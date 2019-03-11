@@ -1,4 +1,4 @@
-package com.txl.android.player.music;
+package com.txl.player.android.music;
 
 /**
  * Copyright (c) 2019, 唐小陆 All rights reserved.

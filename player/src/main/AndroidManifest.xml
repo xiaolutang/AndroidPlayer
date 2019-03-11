@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.txl.player.android.player"
+    >
+
+    <application>
+        <service android:name="com.txl.player.android.music.AndroidMusicPlayerService" />
+    </application>
+</manifest>

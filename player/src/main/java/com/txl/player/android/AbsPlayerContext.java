@@ -1,4 +1,4 @@
-package com.txl.android.player;
+package com.txl.player.android;
 
 
 /**

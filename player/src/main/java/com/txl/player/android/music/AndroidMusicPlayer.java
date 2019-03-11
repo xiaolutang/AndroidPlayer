@@ -1,4 +1,4 @@
-package com.txl.android.player.music;
+package com.txl.player.android.music;
 
 import android.content.Context;
 import android.media.MediaPlayer;

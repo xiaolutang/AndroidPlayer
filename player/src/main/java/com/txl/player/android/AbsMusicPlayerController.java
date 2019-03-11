@@ -1,4 +1,4 @@
-package com.txl.android.player;
+package com.txl.player.android;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -6,8 +6,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.txl.android.player.music.AbsPlayerService;
-import com.txl.android.player.music.IMusicPlayer;
+import com.txl.player.android.music.AbsPlayerService;
+import com.txl.player.android.music.IMusicPlayer;
 
 import java.lang.ref.WeakReference;
 

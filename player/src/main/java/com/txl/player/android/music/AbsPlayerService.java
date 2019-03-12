@@ -121,10 +121,10 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
     }
 
     @Override
-    public void onDestroy(IMusicPlayer player) {
+    public void onMusicServiceDestroy(IMusicPlayer player) {
         if(musicPlayerEvents == null){
             for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-                event.onDestroy(player);
+                event.onMusicServiceDestroy(player);
             }
         }
         musicPlayerEvents = null;

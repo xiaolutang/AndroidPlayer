@@ -7,12 +7,64 @@
     tools:context="activity.MainActivity">
 
     <TextView
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/tv_music_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:layout_marginTop="30dp"
+        android:gravity="center_horizontal"
+        android:textSize="24sp"
+        android:textStyle="bold"/>
+
+    <ImageView
+        android:id="@+id/image_music_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/music_author_icon"/>
+    <ImageView
+        android:id="@+id/image_pre_music"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_toggle_music"
+        app:layout_constraintTop_toBottomOf="@+id/image_music_author"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/image_pre"
+        android:scaleType="centerCrop"/>
+    <ImageView
+        android:id="@+id/image_toggle_music"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintStart_toEndOf="@+id/image_pre_music"
+        app:layout_constraintTop_toTopOf="@+id/image_pre_music"
+        app:layout_constraintBottom_toBottomOf="@+id/image_pre_music"
+        app:layout_constraintEnd_toStartOf="@+id/image_next_music"
+        android:src="@drawable/image_play"
+        android:scaleType="centerCrop"/>
+    <ImageView
+        android:id="@+id/image_next_music"
+        app:layout_constraintStart_toEndOf="@+id/image_toggle_music"
+        app:layout_constraintTop_toTopOf="@+id/image_pre_music"
+        app:layout_constraintBottom_toBottomOf="@+id/image_pre_music"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/image_next"
+        android:scaleType="centerCrop"/>
+    <SeekBar
+        android:id="@+id/music_seek_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_pre_music"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"/>
 
 </android.support.constraint.ConstraintLayout>

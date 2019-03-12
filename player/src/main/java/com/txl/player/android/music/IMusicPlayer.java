@@ -50,7 +50,10 @@ public interface IMusicPlayer {
 
         boolean onProgress(IMusicPlayer player, long pos);
 
-        void onDestroy(IMusicPlayer player);
+        /**
+         * 音频服务destroy
+         * */
+        void onMusicServiceDestroy(IMusicPlayer player);
 
         boolean onPlay(IMusicPlayer player);
 

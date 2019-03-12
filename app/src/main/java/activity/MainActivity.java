@@ -120,9 +120,13 @@ public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicDa
             super.serviceConnect();
             prepareMusicData();
             PlayerTag tag = new PlayerTag(musicData.get( currentPlayIndex ).getPlayUrl());
-            initPlayer(tag);
-            open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
-            changePlayerUiData( musicData.get( currentPlayIndex ) );
+            if(!tag.equals( getPlayTag() )){
+                initPlayer(tag);
+                open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
+                changePlayerUiData( musicData.get( currentPlayIndex ) );
+            }else {
+                togglePlayerUi( isPlay() );
+            }
         }
 
         /**

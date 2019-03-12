@@ -83,6 +83,17 @@ public abstract class AbsMusicPlayerController{
         _mMusicPlayer.startNotification( true );
     }
 
+    protected PlayerTag getPlayTag(){
+        return _mMusicPlayer.getPlayTag();
+    }
+
+    protected boolean isPlay(){
+        if(_mMusicPlayer != null){
+            return _mMusicPlayer.isPlaying();
+        }
+        return false;
+    }
+
     public void setPlayerUiChangeListener(IPlayerUi _mPlayerUiChangeListener) {
         this._mPlayerUiChangeListener = _mPlayerUiChangeListener;
     }

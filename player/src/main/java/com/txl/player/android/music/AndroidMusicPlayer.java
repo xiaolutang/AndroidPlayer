@@ -125,6 +125,11 @@ public class AndroidMusicPlayer implements IMusicPlayer {
                 return _onInfo(mp, what, extra);
             }
         });
+        MediaPlayer oldMediaPlayer = _mp;
+        _mp = mediaPlayer;
+        if (oldMediaPlayer != null) {
+            oldMediaPlayer.release();
+        }
     }
 
     private void _onPrepared(MediaPlayer mp) {
@@ -322,7 +327,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
                 mp.reset();
             }
             mp.setDataSource(_ctx, Uri.parse(_url));
-            _changeState(PS_BUFFERING | PS_PREPARED, PS_PREPARING);
+            _changeState(PS_BUFFERING | PS_PREPARED | PS_UNINITIALIZED, PS_PREPARING);
             if (!_hasState(PS_UNINITIALIZED)) {
                 mp.prepareAsync();
             }

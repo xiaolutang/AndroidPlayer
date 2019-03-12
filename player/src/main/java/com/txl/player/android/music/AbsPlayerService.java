@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +17,14 @@ import java.util.List;
  */
 public abstract class AbsPlayerService extends Service implements IMusicPlayer.IMusicPlayerEvents {
 
+    protected final String TAG = getClass().getSimpleName();
     IMusicPlayer _mPlayer;
     List<IMusicPlayer.IMusicPlayerEvents> musicPlayerEvents;
     boolean hasNotification;
+
+    public AbsPlayerService() {
+        initPlayer();
+    }
 
     void initPlayer(){
         _mPlayer = createPlayer(this);
@@ -27,6 +33,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
             musicPlayerEvents = null;
         }
         _mPlayer.setEventListener(this);
+        _mPlayer.init();
     }
 
     private void addPlayerEventListener(IMusicPlayer.IMusicPlayerEvents event){
@@ -56,6 +63,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
     @Override
     public boolean onError(IMusicPlayer xmp, int code, String msg) {
+        Log.d(TAG,"onError "+"code :"+code+" msg:"+msg );
         if(musicPlayerEvents == null){
             return false;
         }
@@ -67,6 +75,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
     @Override
     public boolean onPrepared(IMusicPlayer player) {
+        Log.d(TAG,"onPrepared " );
         if(musicPlayerEvents == null){
             return false;
         }
@@ -78,6 +87,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
     @Override
     public boolean onSeekComplete(IMusicPlayer player, long pos) {
+        Log.d(TAG,"onSeekComplete " +"pos: "+pos);
         if(musicPlayerEvents == null){
             return false;
         }
@@ -89,6 +99,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
     @Override
     public boolean onComplete(IMusicPlayer player) {
+        Log.d(TAG,"onComplete ");
         if(musicPlayerEvents == null){
             return false;
         }
@@ -165,6 +176,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
     public static class PlayerAdapter extends Binder implements IMusicPlayer,INotification{
         AbsPlayerService absPlayerService;
+        IMusicPlayerEvents playerEvents;
         public PlayerAdapter(AbsPlayerService playerService) {
             this.absPlayerService = playerService;
         }
@@ -172,7 +184,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
 
         @Override
         public void init() {
-            absPlayerService.initPlayer();
+//            absPlayerService.initPlayer();
         }
 
         @Override
@@ -194,18 +206,33 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
         @Override
         public boolean stop() {
             absPlayerService._mPlayer.stop();
+            if(absPlayerService.musicPlayerEvents!=null){
+                for (IMusicPlayer.IMusicPlayerEvents event:absPlayerService.musicPlayerEvents){
+                    event.onPause( absPlayerService._mPlayer );
+                }
+            }
             return true;
         }
 
         @Override
         public boolean pause() {
             absPlayerService._mPlayer.pause();
+            if(absPlayerService.musicPlayerEvents!=null){
+                for (IMusicPlayer.IMusicPlayerEvents event:absPlayerService.musicPlayerEvents){
+                    event.onPause( absPlayerService._mPlayer );
+                }
+            }
             return true;
         }
 
         @Override
         public boolean play() {
             absPlayerService._mPlayer.play();
+            if(absPlayerService.musicPlayerEvents!=null){
+                for (IMusicPlayer.IMusicPlayerEvents event:absPlayerService.musicPlayerEvents){
+                    event.onPlay( absPlayerService._mPlayer );
+                }
+            }
             return true;
         }
 

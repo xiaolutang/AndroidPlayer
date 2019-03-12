@@ -4,10 +4,14 @@ package com.txl.player.android.music;
  * Copyright (c) 2019, 唐小陆 All rights reserved.
  * author：txl
  * date：2019/3/11
- * description：播放器的标志器
+ * description：播放器的标志器,判断是否在播放相同的内容
  */
 public class PlayerTag {
     String url;
+
+    public PlayerTag(String url) {
+        this.url = url;
+    }
 
     public String getUrl() {
         return url;

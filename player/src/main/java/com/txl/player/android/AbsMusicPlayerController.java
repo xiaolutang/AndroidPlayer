@@ -1,7 +1,9 @@
 package com.txl.player.android;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
@@ -9,6 +11,7 @@ import android.util.Log;
 import com.txl.player.android.music.AbsPlayerService;
 import com.txl.player.android.music.IMusicPlayer;
 import com.txl.player.android.music.IPlayerUi;
+import com.txl.player.android.music.PlayerTag;
 
 import java.lang.ref.WeakReference;
 
@@ -24,7 +27,10 @@ public abstract class AbsMusicPlayerController{
     IPlayerUi _mPlayerUiChangeListener;
     MusicPlayerEvents iMusicPlayerEvents;
 
-    public AbsMusicPlayerController(Context context) {
+    /**
+     * @param serviceClass 服务的class
+     * */
+    public AbsMusicPlayerController(Context context,Class<?extends Service> serviceClass) {
         _mContext = new WeakReference<>(context);
         iMusicPlayerEvents = new MusicPlayerEvents(this);
         serviceConnection = new ServiceConnection() {
@@ -33,6 +39,7 @@ public abstract class AbsMusicPlayerController{
                 if(service instanceof IMusicPlayer){
                     _mMusicPlayer = (AbsPlayerService.PlayerAdapter) service;
                     _mMusicPlayer.setEventListener(iMusicPlayerEvents);
+                    serviceConnect();
                 }else {
                     Log.e(TAG,"serviceConnection _mMusicPlayer init error unBind service");
                     Context c = _mContext.get();
@@ -47,20 +54,81 @@ public abstract class AbsMusicPlayerController{
                 _mMusicPlayer.removeEventListener(iMusicPlayerEvents);
             }
         };
+        bindService(context,serviceClass);
     }
 
-    protected void initPlayer(Object playTag){
+    private void bindService(Context context,Class<?extends Service> serviceClass){
+        Intent intent = getBindServiceIntent();
+        if(intent == null){
+            intent = new Intent(  );
+        }
+        intent.setClass( context, serviceClass);
+        context.bindService( intent,serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     * 绑定服务所需要的Intent
+     * */
+    protected abstract Intent getBindServiceIntent();
+
+    protected void serviceConnect(){
+
+    }
+
+    protected void initPlayer(PlayerTag playTag){
         //两次tag相同就认为播放的是同一个音频
         if(!playTag.equals(_mMusicPlayer.getPlayTag())){
             _mMusicPlayer.init();
-            _mMusicPlayer.startNotification( true );
         }
+        _mMusicPlayer.startNotification( true );
     }
 
     public void setPlayerUiChangeListener(IPlayerUi _mPlayerUiChangeListener) {
         this._mPlayerUiChangeListener = _mPlayerUiChangeListener;
     }
 
+    protected void open(String url,PlayerTag playerTag){
+        _mMusicPlayer.setPlayTag( playerTag );
+        _mMusicPlayer.open( url );
+    }
+
+    public void play(){
+        if(_mMusicPlayer!=null){
+            _mMusicPlayer.play();
+        }
+    }
+
+    public void pause(){
+        if(_mMusicPlayer!=null){
+            _mMusicPlayer.pause();
+        }
+    }
+
+    public void stop(){
+        if(_mMusicPlayer!=null){
+            _mMusicPlayer.stop();
+        }
+    }
+
+    public void togglePlay(){
+        if(_mMusicPlayer!=null){
+            if(_mMusicPlayer.isPlaying()){
+                pause();
+            }else {
+                play();
+            }
+        }
+    }
+
+    public void seek(long pos){
+        if(_mMusicPlayer!=null){
+            _mMusicPlayer.seekTo( pos );
+        }
+    }
+
+    public abstract void playNext();
+
+    public abstract void playPre();
 
     /**
      * 播放页面销毁，销毁对应的控制器

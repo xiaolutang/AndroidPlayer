@@ -134,8 +134,10 @@ public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicDa
          * */
         private void prepareMusicData(){
             musicData = new ArrayList<>(  );
-            musicData.add( new MusicData(R.drawable.music_author_01,"一曲相思","http://fs.w.kugou.com/201903122113/79e43f0077b4649d76c73bc7c2336124/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
-            musicData.add( new MusicData(R.drawable.music_author_02,"生僻字","http://fs.w.kugou.com/201903122118/7ce6189bd6d162e27f15bd01fc957e76/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
+            //需要自己处理播放地址，这个地址仅限当天有效
+            musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903132339/d4f8bcfe9e2a0fdacf26617fa3d1ad07/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
+            musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903132343/8d519e70134a078de8cbe588317bfe7d/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
+
         }
 
         @Override

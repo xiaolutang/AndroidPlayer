@@ -15,7 +15,7 @@ import java.util.List;
  * @author TXL
  * description :音频播放服务
  */
-public abstract class AbsPlayerService extends Service implements IMusicPlayer.IMusicPlayerEvents {
+public abstract class AbsPlayerService extends Service {
 
     protected final String TAG = getClass().getSimpleName();
     IMusicPlayer _mPlayer;
@@ -32,7 +32,7 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
             musicPlayerEvents.clear();
             musicPlayerEvents = null;
         }
-        _mPlayer.setEventListener(this);
+        _mPlayer.setEventListener(new PlayerEventListener());
         _mPlayer.init();
     }
 
@@ -61,117 +61,121 @@ public abstract class AbsPlayerService extends Service implements IMusicPlayer.I
         return new PlayerAdapter(this);
     }
 
-    @Override
-    public boolean onError(IMusicPlayer xmp, int code, String msg) {
-        Log.d(TAG,"onError "+"code :"+code+" msg:"+msg );
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onError(xmp,code,msg);
-        }
-        return true;
-    }
 
-    @Override
-    public boolean onPrepared(IMusicPlayer player) {
-        Log.d(TAG,"onPrepared " );
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onPrepared(player);
-        }
-        return true;
-    }
 
-    @Override
-    public boolean onSeekComplete(IMusicPlayer player, long pos) {
-        Log.d(TAG,"onSeekComplete " +"pos: "+pos);
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onSeekComplete(player,pos);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onComplete(IMusicPlayer player) {
-        Log.d(TAG,"onComplete ");
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onComplete(player);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onBuffering(IMusicPlayer player, boolean buffering, float percentage) {
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onBuffering(player,buffering,percentage);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onProgress(IMusicPlayer player, long pos) {
-        if(musicPlayerEvents == null){
-            return false;
-        }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onProgress(player,pos);
-        }
-        return true;
-    }
-
-    @Override
-    public void onMusicServiceDestroy(IMusicPlayer player) {
-        if(musicPlayerEvents == null){
-            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-                event.onMusicServiceDestroy(player);
+    private class PlayerEventListener  implements IMusicPlayer.IMusicPlayerEvents{
+        @Override
+        public boolean onError(IMusicPlayer xmp, int code, String msg) {
+            Log.d(TAG,"onError "+"code :"+code+" msg:"+msg );
+            if(musicPlayerEvents == null){
+                return false;
             }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onError(xmp,code,msg);
+            }
+            return true;
         }
-        musicPlayerEvents = null;
-    }
 
-    @Override
-    public boolean onPlay(IMusicPlayer player) {
-        if(musicPlayerEvents == null){
-            return false;
+        @Override
+        public boolean onPrepared(IMusicPlayer player) {
+            Log.d(TAG,"onPrepared " );
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onPrepared(player);
+            }
+            return true;
         }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onPlay(player);
-        }
-        return true;
-    }
 
-    @Override
-    public boolean onPause(IMusicPlayer player) {
-        if(musicPlayerEvents == null){
-            return false;
+        @Override
+        public boolean onSeekComplete(IMusicPlayer player, long pos) {
+            Log.d(TAG,"onSeekComplete " +"pos: "+pos);
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onSeekComplete(player,pos);
+            }
+            return true;
         }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onPause(player);
-        }
-        return true;
-    }
 
-    @Override
-    public boolean onStop(IMusicPlayer player) {
-        if(musicPlayerEvents == null){
-            return false;
+        @Override
+        public boolean onComplete(IMusicPlayer player) {
+            Log.d(TAG,"onComplete ");
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onComplete(player);
+            }
+            return true;
         }
-        for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
-            event.onStop(player);
+
+        @Override
+        public boolean onBuffering(IMusicPlayer player, boolean buffering, float percentage) {
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onBuffering(player,buffering,percentage);
+            }
+            return true;
         }
-        return true;
+
+        @Override
+        public boolean onProgress(IMusicPlayer player, long pos) {
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onProgress(player,pos);
+            }
+            return true;
+        }
+
+        @Override
+        public void onMusicServiceDestroy(IMusicPlayer player) {
+            if(musicPlayerEvents == null){
+                for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                    event.onMusicServiceDestroy(player);
+                }
+            }
+            musicPlayerEvents = null;
+        }
+
+        @Override
+        public boolean onPlay(IMusicPlayer player) {
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onPlay(player);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onPause(IMusicPlayer player) {
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onPause(player);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onStop(IMusicPlayer player) {
+            if(musicPlayerEvents == null){
+                return false;
+            }
+            for (IMusicPlayer.IMusicPlayerEvents event : musicPlayerEvents){
+                event.onStop(player);
+            }
+            return true;
+        }
     }
 
     public static class PlayerAdapter extends Binder implements IMusicPlayer,INotification{

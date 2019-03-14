@@ -2,6 +2,7 @@ package com.txl.player.android.music;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 
 /**
@@ -24,5 +25,9 @@ public abstract class AbsMusicPlayerService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public class PlayerProxy extends Binder{
+
     }
 }

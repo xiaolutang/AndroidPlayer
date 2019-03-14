@@ -22,14 +22,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -41,44 +39,21 @@ import com.txl.player.android.player.R;
  * Keeps track of a notification and updates it automatically for a given MediaSession. This is
  * required so that the music service don't get killed during playback.
  */
-public class MediaNotificationManager {
-    public static int TYPE_VOD = 0;
-    public static int TYPE_IMAGE_TEXT = 1;
-    public static int TYPE_ALBUM = 2;
-    public static int TYPE_LIVE = 3;
-
+public abstract class MediaNotificationStrategy implements INotificationStrategy{
+    private static final String TAG = MediaNotificationStrategy.class.getSimpleName();
     public static final int NOTIFICATION_ID = 499;
-
-    private static final String TAG = MediaNotificationManager.class.getSimpleName();
     private static final int REQUEST_CODE = 521;
 
-    private final Service mService;
-    private int mType;
-
+    private INotificationStrategy customNotificationStrategy;
+    private final Context mContext;
     private final NotificationManager mNotificationManager;
     private final String CHANNEL_ID;
 
-
-    public void setmType(int mType) {
-        this.mType = mType;
-    }
-
-    public MediaNotificationManager(Service service, int type) {
-        mService = service;
-        mType = type;
-        CHANNEL_ID = service.getPackageName();
+    public MediaNotificationStrategy(Context context) {
+        mContext = context;
+        CHANNEL_ID = context.getPackageName();
         mNotificationManager =
-                (NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
-
-
-
-        // Cancel all notifications to handle the case where the Service was killed and
-        // restarted by the system.
-        mNotificationManager.cancelAll();
-    }
-
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     public NotificationManager getNotificationManager() {
@@ -98,6 +73,13 @@ public class MediaNotificationManager {
         return builder.build();
     }
 
+    public void removeNotification(){
+
+    }
+
+    public void setCustomNotificationStrategy(INotificationStrategy customNotificationStrategy) {
+        this.customNotificationStrategy = customNotificationStrategy;
+    }
 
     /**
      * @param logoRes
@@ -109,8 +91,8 @@ public class MediaNotificationManager {
         if (isAndroidOOrHigher()) {
             createChannel();
         }
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(mService, CHANNEL_ID);
-        final RemoteViews normalRemoteViews = new RemoteViews(mService.getPackageName(),R.layout.normal_notification);
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+        final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
         normalRemoteViews.setImageViewResource(R.id.ib_toggle,toggleRes);
         normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle,createStopIntent());
         normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
@@ -132,17 +114,17 @@ public class MediaNotificationManager {
         return builder;
     }
 
-    private PendingIntent createStopIntent() {
+    protected PendingIntent createStopIntent() {
         return null;
     }
 
-    private PendingIntent createContentIntent() {
+    protected PendingIntent createContentIntent() {
         return null;
     }
 
     // Does nothing on versions of Android earlier than O.
     @RequiresApi(Build.VERSION_CODES.O)
-    private void createChannel() {
+    protected void createChannel() {
         if (mNotificationManager.getNotificationChannel(CHANNEL_ID) == null) {
             // The user-visible name of the channel.
             CharSequence name = "MediaSession";
@@ -168,6 +150,58 @@ public class MediaNotificationManager {
 
     private boolean isAndroidOOrHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+    }
+
+    @Override
+    public Notification createPlayNotification() {
+        if(customNotificationStrategy == null){
+            if (isAndroidOOrHigher()) {
+                createChannel();
+            }
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle,createStopIntent());
+//            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
+
+            builder
+                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                    .setVibrate(new long[]{0})
+                    .setSound(null)
+                    .setCustomContentView(normalRemoteViews)
+//                    .setSmallIcon(logoRes)
+                    .setShowWhen(false)
+                    .setColor(Color.RED)//可以主动设置
+                    .setContentIntent(createContentIntent())
+                    // Show controls on lock screen even when user hides sensitive content.
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            return null;
+        }
+        return customNotificationStrategy.createPlayNotification();
+    }
+
+    @Override
+    public Notification createPauseNotification() {
+        if(customNotificationStrategy == null){
+            return null;
+        }
+        return customNotificationStrategy.createPauseNotification();
+    }
+
+    @Override
+    public Notification createSeekNotification(long pos) {
+        if(customNotificationStrategy == null){
+            return null;
+        }
+        return customNotificationStrategy.createSeekNotification(pos);
+    }
+
+    @Override
+    public Notification createOtherNotification(String action, Object... o) {
+        if(customNotificationStrategy == null){
+            return null;
+        }
+        return customNotificationStrategy.createOtherNotification(action,o);
     }
 
 }

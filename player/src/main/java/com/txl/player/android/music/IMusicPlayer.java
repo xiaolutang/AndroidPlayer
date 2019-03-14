@@ -60,5 +60,7 @@ public interface IMusicPlayer {
         boolean onPause(IMusicPlayer player);
 
         boolean onStop(IMusicPlayer player);
+
+        boolean otherThings(String action, Object... o);
     }
 }

@@ -237,6 +237,11 @@ public abstract class AbsMusicPlayerController{
             return false;
         }
 
+        @Override
+        public boolean otherThings(String action, Object... o) {
+            return false;
+        }
+
         public void destroy(){
             musicPlayerController = null;
         }

@@ -41,7 +41,6 @@ import com.txl.player.android.player.R;
 public abstract class MediaNotificationManager implements INotificationStrategy{
     private static final String TAG = MediaNotificationManager.class.getSimpleName();
     public static final int NOTIFICATION_ID = 499;
-    private static final int REQUEST_CODE = 521;
 
     private INotificationStrategy customNotificationStrategy;
     private final Context mContext;
@@ -61,23 +60,6 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
 
     public int getNotificationId(){
         return NOTIFICATION_ID;
-    }
-
-    public Notification getNotification( @DrawableRes int logoRes, @DrawableRes int toggleRes, String musicName) {
-
-        NotificationCompat.Builder builder =
-                buildNotification(logoRes, toggleRes,musicName,null);
-        return builder.build();
-    }
-
-    public Notification getNotification(@DrawableRes int logoRes, @DrawableRes int toggleRes, String musicName, Bitmap logoBitmap) {
-        NotificationCompat.Builder builder =
-                buildNotification(logoRes, toggleRes,musicName,logoBitmap);
-        return builder.build();
-    }
-
-    public void removeNotification(){
-
     }
 
     public void setCustomNotificationStrategy(INotificationStrategy customNotificationStrategy) {
@@ -161,7 +143,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
             if (isAndroidOOrHigher()) {
                 createChannel();
             }
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID+"bbb");
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
             normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
@@ -172,7 +154,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
                     .setVibrate(new long[]{0})
                     .setSound(null)
                     .setCustomContentView(normalRemoteViews)
-//                    .setSmallIcon(logoRes)
+                    .setSmallIcon(R.drawable.easy_player_icon)
                     .setShowWhen(false)
                     .setColor(Color.RED)//可以主动设置
                     .setContentIntent(createContentIntent())
@@ -189,7 +171,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
             if (isAndroidOOrHigher()) {
                 createChannel();
             }
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID+"aaa");
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
             normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
@@ -200,7 +182,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
                     .setVibrate(new long[]{0})
                     .setSound(null)
                     .setCustomContentView(normalRemoteViews)
-//                    .setSmallIcon(logoRes)
+                    .setSmallIcon(R.drawable.easy_player_icon)
                     .setShowWhen(false)
                     .setColor(Color.RED)//可以主动设置
                     .setContentIntent(createContentIntent())

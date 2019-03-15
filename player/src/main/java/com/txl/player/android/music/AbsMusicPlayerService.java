@@ -56,7 +56,6 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
 
     @Override
     public boolean onError(IMusicPlayer xmp, int code, String msg) {
-        notificationManager.removeNotification();
         return true;
     }
 

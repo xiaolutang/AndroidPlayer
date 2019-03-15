@@ -8,15 +8,13 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
-import com.txl.player.android.music.AbsPlayerController;
-import com.txl.player.android.music.MediaNotificationManager;
-import com.txl.player.android.music.PlayerTag;
+import com.txl.player.music.AbsPlayerController;
+import com.txl.player.music.MediaNotificationManager;
+import com.txl.player.music.PlayerTag;
 import com.txl.player.android.player.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.txl.page.MainActivity;
 
 
 /**

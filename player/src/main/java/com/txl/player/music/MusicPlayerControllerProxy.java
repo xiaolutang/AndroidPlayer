@@ -1,4 +1,4 @@
-package com.txl.player.android.music;
+package com.txl.player.music;
 
 import android.content.Intent;
 import android.os.Binder;

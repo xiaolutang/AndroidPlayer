@@ -1,8 +1,9 @@
 package com.txl.demo;
 
 import android.support.v7.app.AppCompatActivity;
-import com.txl.player.android.player.R;
 import android.os.Bundle;
+
+import com.txl.android.player.R;
 
 public class Main2Activity extends AppCompatActivity {
 

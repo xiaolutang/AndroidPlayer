@@ -1,12 +1,9 @@
-package com.txl.player.android.music;
+package com.txl.player.music;
 
 import android.app.Notification;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 /**

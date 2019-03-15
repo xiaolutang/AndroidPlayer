@@ -1,13 +1,12 @@
-package com.txl.player.android.video;
+package com.txl.player.video;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Surface;
-import android.view.TextureView;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -19,20 +18,19 @@ import java.lang.ref.WeakReference;
 /**
  * Copyright (c) 2018, 唐小陆 All rights reserved.
  * author：txl
- * date：2018/8/9
- * description：fixme 切换TextureView的parent开始播放的时候有时会先黑屏一下在播放
+ * date：2018/8/7
+ * description：
  */
-public class TextureAndroidPlayer implements IMediaPlayer {
-    private static final String TAG = TextureAndroidPlayer.class.getSimpleName();
+public class AndroidPlayer implements IMediaPlayer {
+    private static final String TAG = AndroidPlayer.class.getSimpleName();
     Context _ctx;
     ViewGroup _parent;
-    TextureView _textureView;
+    SurfaceView _surface;
     MediaPlayer _mp;
     String _url;
     long _seekTarget;
     private boolean _singlePlayer = false;
     private boolean _disposablePlayer = false;
-    TextureView.SurfaceTextureListener _surfaceTextureListener;
 
     int _playerState = PS_UNINITIALIZED;
 
@@ -49,10 +47,11 @@ public class TextureAndroidPlayer implements IMediaPlayer {
     static final int PS_PREPARING = 0x0002;
     static final int PS_PLAYING = 0x0001;
     private IMediaPlayerEvents _listener;
-    private Surface _surface;
+    private SurfaceHolder.Callback _surfaceHolderCallback;
+    private SurfaceHolder _surfaceHolder;
 
-    private static WeakReference<TextureAndroidPlayer> _currentPlayer;
-    private WeakReference<TextureAndroidPlayer> _previousPlayer;
+    private static WeakReference<AndroidPlayer> _currentPlayer;
+    private WeakReference<AndroidPlayer> _previousPlayer;
 
     private void _changeState(int removeState, int addState) {
         _playerState = (_playerState & ~removeState) | addState;
@@ -66,53 +65,49 @@ public class TextureAndroidPlayer implements IMediaPlayer {
         return (_playerState & state) != 0;
     }
 
-    public TextureAndroidPlayer(boolean singlePlayer, boolean disposablePlayer) {
+    public AndroidPlayer(boolean singlePlayer, boolean disposablePlayer) {
         _singlePlayer = singlePlayer;
         _disposablePlayer = disposablePlayer;
         _previousPlayer = _currentPlayer;
-        _currentPlayer = new WeakReference<TextureAndroidPlayer>(this);
+        _currentPlayer = new WeakReference<AndroidPlayer>(this);
     }
 
-    public TextureAndroidPlayer(boolean singlePlayer) {
+    public AndroidPlayer(boolean singlePlayer) {
         this(singlePlayer, false);
     }
 
-    public TextureAndroidPlayer() {
+    public AndroidPlayer() {
         this(false);
     }
-
 
     @Override
     public View init(Context ctx, ViewGroup parent) {
         _ctx = ctx;
         _parent = parent;
-        _textureView = new TextureView( ctx );
+        _surface = new SurfaceView(ctx);
+        _surface.setZOrderOnTop(false);
+        _surface.setZOrderMediaOverlay(false);
         _createMediaPlayer();
-        _surfaceTextureListener = new TextureView.SurfaceTextureListener() {
+        _surfaceHolderCallback = new SurfaceHolder.Callback() {
             @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                _onInitialized(surface);
+            public void surfaceCreated(SurfaceHolder holder) {
+                _onInitialized(holder);
             }
 
             @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                _onInitialized(surface);
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                _onInitialized(holder);
             }
 
             @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            public void surfaceDestroyed(SurfaceHolder holder) {
                 _onSurfaceDestroyed();
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-                _onInitialized(surface);
             }
         };
-        _textureView.setSurfaceTextureListener( _surfaceTextureListener );
-//        _parent.addView( _textureView );
-        return _textureView;
+        _surface.getHolder().addCallback(_surfaceHolderCallback);
+
+        _parent.addView(_surface);
+        return _surface;
     }
 
     @Override
@@ -127,7 +122,7 @@ public class TextureAndroidPlayer implements IMediaPlayer {
 
     private void _createMediaPlayer() {
         if (_singlePlayer && _previousPlayer != null) {
-            TextureAndroidPlayer prevPlayer = _previousPlayer.get();
+            AndroidPlayer prevPlayer = _previousPlayer.get();
             if (prevPlayer != null) {
                 prevPlayer._disposePlayer();
             }
@@ -187,8 +182,8 @@ public class TextureAndroidPlayer implements IMediaPlayer {
             oldMediaPlayer.release();
         }
 
-        if (_surface != null) {
-            mediaPlayer.setSurface(_surface);
+        if (_surfaceHolder != null) {
+            mediaPlayer.setDisplay(_surfaceHolder);
         }
     }
 
@@ -226,7 +221,7 @@ public class TextureAndroidPlayer implements IMediaPlayer {
         return false;
     }
 
-    protected void onFirstFramePaint(TextureAndroidPlayer xulAndroidPlayer) {
+    protected void onFirstFramePaint(AndroidPlayer xulAndroidPlayer) {
     }
 
     private boolean _onError(MediaPlayer mp, int what, int extra) {
@@ -290,9 +285,9 @@ public class TextureAndroidPlayer implements IMediaPlayer {
             _mp.start();
         }
 
-//        if (_textureView != null) {
-//            _textureView.requestLayout();
-//        }
+        if (_surface != null) {
+            _surface.requestLayout();
+        }
 
         IMediaPlayerEvents listener = _listener;
         if (listener != null) {
@@ -300,10 +295,10 @@ public class TextureAndroidPlayer implements IMediaPlayer {
         }
     }
 
-    private void _onInitialized(SurfaceTexture surfaceTexture) {
-        _surface = new Surface(surfaceTexture);
-        if (_mp != null && _surface != null) {
-            _mp.setSurface( _surface );
+    private void _onInitialized(SurfaceHolder holder) {
+        _surfaceHolder = holder;
+        if (_mp != null && holder != null) {
+            _mp.setDisplay(holder);
         }
         if (!_hasState(PS_UNINITIALIZED)) {
             _onSurfaceRestored();
@@ -331,7 +326,7 @@ public class TextureAndroidPlayer implements IMediaPlayer {
     }
 
     private void _onSurfaceDestroyed() {
-        _surface = null;
+        _surfaceHolder = null;
         if (_mp == null) {
             return;
         }
@@ -504,10 +499,10 @@ public class TextureAndroidPlayer implements IMediaPlayer {
             mp.release();
         }
 
-        TextureView textureView = _textureView;
-        _textureView = null;
-        if (textureView != null) {
-            _parent.removeView(textureView);
+        SurfaceView surface = _surface;
+        _surface = null;
+        if (surface != null) {
+            _parent.removeView(surface);
             _parent = null;
         }
     }
@@ -541,20 +536,5 @@ public class TextureAndroidPlayer implements IMediaPlayer {
     @Override
     public boolean isPlaying() {
         return _mp != null && _hasState(PS_PLAYING | PS_PREPARED) && !_hasAnyState(PS_STOPPED | PS_UNINITIALIZED | PS_RELEASED);
-    }
-
-    public void settextureViewParent(ViewGroup parent){
-        if(_parent == parent){
-            return;
-        }
-        if(_parent != null){
-            _parent.removeView( _textureView );
-        }
-        _parent = parent;
-        _parent.addView( _textureView ,1);
-    }
-
-    public MediaPlayer getMediaplayer(){
-        return  _mp;
     }
 }

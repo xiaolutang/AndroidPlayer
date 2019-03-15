@@ -1,8 +1,8 @@
 package com.txl.demo;
 
 
-import com.txl.player.android.music.AbsMusicPlayerService;
-import com.txl.player.android.music.IMusicPlayerController;
+import com.txl.player.music.AbsMusicPlayerService;
+import com.txl.player.music.IMusicPlayerController;
 
 /**
  * Copyright (c) 2019, 唐小陆 All rights reserved.

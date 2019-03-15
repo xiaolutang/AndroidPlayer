@@ -1,4 +1,4 @@
-package com.txl.player.android.video;
+package com.txl.player.video;
 
 import android.content.Context;
 import android.os.Bundle;

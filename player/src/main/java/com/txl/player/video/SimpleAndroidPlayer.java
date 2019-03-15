@@ -1,24 +1,30 @@
-package com.txl.player.android.music;
+package com.txl.player.video;
 
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.Surface;
+import android.view.View;
+import android.view.ViewGroup;
+
+import org.xml.sax.Locator;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
- * Copyright (c) 2019, 唐小陆 All rights reserved.
+ * Copyright (c) 2018, 唐小陆 All rights reserved.
  * author：txl
- * date：2019/3/11
- * description：音频播放
+ * date：2018/8/9
+ * description：仅提供简单的播放器的封装，没有与之关联的surfaceView和TextureView
  */
-public class AndroidMusicPlayer implements IMusicPlayer {
-    private static final String TAG = AndroidMusicPlayer.class.getSimpleName();
+public class SimpleAndroidPlayer implements IMediaPlayer {
+    private static final String TAG = SimpleAndroidPlayer.class.getSimpleName();
     Context _ctx;
     MediaPlayer _mp;
     String _url;
-    PlayerTag tag;
     long _seekTarget;
     private boolean _singlePlayer = false;
     private boolean _disposablePlayer = false;
@@ -37,11 +43,11 @@ public class AndroidMusicPlayer implements IMusicPlayer {
     static final int PS_BUFFERING = 0x0004;
     static final int PS_PREPARING = 0x0002;
     static final int PS_PLAYING = 0x0001;
+    private IMediaPlayerEvents _listener;
 
-    private IMusicPlayer.IMusicPlayerEvents _listener;
-
-    private static WeakReference<AndroidMusicPlayer> _currentPlayer;
-    private WeakReference<AndroidMusicPlayer> _previousPlayer;
+    private static WeakReference<SimpleAndroidPlayer> _currentPlayer;
+    private WeakReference<SimpleAndroidPlayer> _previousPlayer;
+    private Surface _surface;
 
     private void _changeState(int removeState, int addState) {
         _playerState = (_playerState & ~removeState) | addState;
@@ -55,32 +61,49 @@ public class AndroidMusicPlayer implements IMusicPlayer {
         return (_playerState & state) != 0;
     }
 
-    public AndroidMusicPlayer(Context context, boolean singlePlayer, boolean disposablePlayer){
-        _ctx = context;
+    public SimpleAndroidPlayer(boolean singlePlayer, boolean disposablePlayer) {
         _singlePlayer = singlePlayer;
         _disposablePlayer = disposablePlayer;
         _previousPlayer = _currentPlayer;
-        _currentPlayer = new WeakReference<AndroidMusicPlayer>( this );
+        _currentPlayer = new WeakReference<SimpleAndroidPlayer>(this);
     }
 
-    public AndroidMusicPlayer(Context context, boolean singlePlayer) {
-        this(context,singlePlayer, false);
+    public SimpleAndroidPlayer(boolean singlePlayer) {
+        this(singlePlayer, false);
+    }
+
+    public SimpleAndroidPlayer() {
+        this(false);
     }
 
     @Override
-    public void init() {
-        _createMusicPlayer();
+    public View init(Context ctx, ViewGroup parent) {
+        _ctx = ctx;
+        _createMediaPlayer();
+        return null;
     }
 
-    private void _createMusicPlayer(){
-        if(_singlePlayer && _previousPlayer != null){
-            AndroidMusicPlayer prevPlayer = _previousPlayer.get();
-            if(prevPlayer != null){
+    @Override
+    public boolean setLocation(String location) {
+        return false;
+    }
+
+    @Override
+    public boolean setScaleMode(int mode) {
+        return false;
+    }
+
+    private void _createMediaPlayer() {
+        if (_singlePlayer && _previousPlayer != null) {
+            SimpleAndroidPlayer prevPlayer = _previousPlayer.get();
+            if (prevPlayer != null) {
                 prevPlayer._disposePlayer();
             }
         }
+
         MediaPlayer mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnPreparedListener( new MediaPlayer.OnPreparedListener() {
+//        mediaPlayer.setScreenOnWhilePlaying(true);
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 if (_mp != mp) {
@@ -88,7 +111,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
                 }
                 _onPrepared(mp);
             }
-        } );
+        });
         mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mp) {
@@ -125,26 +148,71 @@ public class AndroidMusicPlayer implements IMusicPlayer {
                 return _onInfo(mp, what, extra);
             }
         });
+
         MediaPlayer oldMediaPlayer = _mp;
         _mp = mediaPlayer;
         if (oldMediaPlayer != null) {
             oldMediaPlayer.release();
         }
+
     }
 
-    private void _onPrepared(MediaPlayer mp) {
-        _changeState(PS_PREPARING, PS_PREPARED);
-        if (_hasState(PS_STOPPED)) {
-            _mp.stop();
-        } else if (_hasState(PS_SEEKING)) {
-            _mp.seekTo((int) _seekTarget);
-        } else if (_hasState(PS_PLAYING)) {
-            _mp.start();
+    private void _disposePlayer() {
+        MediaPlayer mp = _mp;
+        _mp = null;
+        if (mp != null) {
+            mp.setOnErrorListener(null);
+            mp.setOnBufferingUpdateListener(null);
+            mp.setOnSeekCompleteListener(null);
+            mp.setOnCompletionListener(null);
+            mp.setOnPreparedListener(null);
+            mp.setOnInfoListener(null);
+            mp.setDisplay(null);
+            _changeState(PS_PREPARED | PS_PREPARING | PS_STOPPED | PS_ERROR, PS_REBUILD | PS_RELEASED);
+            mp.release();
         }
+    }
 
-        IMusicPlayerEvents listener = _listener;
+    private boolean _onInfo(MediaPlayer mp, int what, int extra) {
+        if (isMediaStopped()) {
+            return false;
+        }
+        IMediaPlayerEvents listener = _listener;
+        if (listener == null) {
+            return false;
+        }
+        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+            listener.onBuffering(this, false, 100.0f);
+        } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+            listener.onBuffering(this, true, 0.0f);
+        } else if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+            onFirstFramePaint(this);
+        }
+        return false;
+    }
+
+    protected void onFirstFramePaint(SimpleAndroidPlayer simpleAndroidPlayer) {
+    }
+
+    private boolean _onError(MediaPlayer mp, int what, int extra) {
+        _changeState(0, PS_ERROR);
+        if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
+            _changeState(0, PS_REBUILD);
+        }
+        IMediaPlayerEvents listener = _listener;
         if (listener != null) {
-            listener.onPrepared(this);
+            return listener.onError(this, what, String.valueOf(extra));
+        }
+        return true;
+    }
+
+    private void _onCompletion(MediaPlayer mp) {
+        if (isMediaStopped()) {
+            return;
+        }
+        IMediaPlayerEvents listener = _listener;
+        if (listener != null) {
+            listener.onComplete(this);
         }
     }
 
@@ -167,7 +235,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
         if (isMediaStopped()) {
             return;
         }
-        IMusicPlayerEvents listener = _listener;
+        IMediaPlayerEvents listener = _listener;
         if (listener != null) {
             listener.onSeekComplete(this, getCurrentPosition());
         }
@@ -177,58 +245,72 @@ public class AndroidMusicPlayer implements IMusicPlayer {
         return !_hasState(PS_PREPARED) || _hasAnyState(PS_STOPPED | PS_RELEASED | PS_UNINITIALIZED);
     }
 
-    private void _onCompletion(MediaPlayer mp) {
-        if (isMediaStopped()) {
+    private void _onPrepared(MediaPlayer mp) {
+        _changeState(PS_PREPARING, PS_PREPARED);
+        if (_hasState(PS_STOPPED)) {
+            _mp.stop();
+        } else if (_hasState(PS_SEEKING)) {
+            _mp.seekTo((int) _seekTarget);
+        } else if (_hasState(PS_PLAYING)) {
+            _mp.start();
+        }
+
+        IMediaPlayerEvents listener = _listener;
+        if (listener != null) {
+            listener.onPrepared(this);
+        }
+    }
+
+    private void _onInitialized(Surface surface) {
+        _surface = surface;
+        if (_mp != null && surface != null) {
+            _mp.setSurface( surface );
+        }
+        if (!_hasState(PS_UNINITIALIZED)) {
+            _onSurfaceRestored();
             return;
         }
-        IMusicPlayerEvents listener = _listener;
-        if (listener != null) {
-            listener.onComplete(this);
+        _changeState(PS_UNINITIALIZED, 0);
+        if (_hasState(PS_PREPARING)) {
+            _mp.prepareAsync();
         }
     }
 
-    private boolean _onError(MediaPlayer mp, int what, int extra) {
-        _changeState(0, PS_ERROR);
-        if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-            _changeState(0, PS_REBUILD);
+    private void _onSurfaceRestored() {
+        if (!_hasState(PS_SURFACE_LOST)) {
+            return;
         }
-        IMusicPlayerEvents listener = _listener;
-        if (listener != null) {
-            return listener.onError(this, what, String.valueOf(extra));
+        _changeState(PS_SURFACE_LOST, 0);
+
+        if (_hasAnyState(PS_STOPPED | PS_ERROR)) {
+            return;
         }
-        return true;
+
+        if (_hasState(PS_PLAYING)) {
+            _mp.start();
+        }
     }
 
-    private boolean _onInfo(MediaPlayer mp, int what, int extra) {
-        if (isMediaStopped()) {
-            return false;
+    private void _onSurfaceDestroyed() {
+        if (_mp == null) {
+            return;
         }
-        IMusicPlayerEvents listener = _listener;
-        if (listener == null) {
-            return false;
+        _mp.setDisplay(null);
+        if (_hasState(PS_UNINITIALIZED)) {
+            return;
         }
-        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-            listener.onBuffering(this, false, 100.0f);
-        } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-            listener.onBuffering(this, true, 0.0f);
+        if (_hasState(PS_PREPARED) && !_hasAnyState(PS_UNINITIALIZED | PS_STOPPED | PS_ERROR)) {
+            _mp.pause();
         }
-        return false;
+        _changeState(0, PS_SURFACE_LOST);
     }
 
-    private void _disposePlayer() {
-        MediaPlayer mp = _mp;
-        _mp = null;
-        if (mp != null) {
-            mp.setOnErrorListener(null);
-            mp.setOnBufferingUpdateListener(null);
-            mp.setOnSeekCompleteListener(null);
-            mp.setOnCompletionListener(null);
-            mp.setOnPreparedListener(null);
-            mp.setOnInfoListener(null);
-            mp.setDisplay(null);
-            _changeState(PS_PREPARED | PS_PREPARING | PS_STOPPED | PS_ERROR, PS_REBUILD | PS_RELEASED);
-            mp.release();
+    @Override
+    public long getDuration() {
+        if (_hasState(PS_PREPARED)) {
+            return _mp.getDuration();
         }
+        return 0;
     }
 
     @Override
@@ -261,6 +343,11 @@ public class AndroidMusicPlayer implements IMusicPlayer {
             _mp.seekTo((int) pos);
         }
         return true;
+    }
+
+    @Override
+    public boolean setStopMode(int mode) {
+        return false;
     }
 
     @Override
@@ -306,6 +393,21 @@ public class AndroidMusicPlayer implements IMusicPlayer {
     }
 
     @Override
+    public boolean closeVideo() {
+        return false;
+    }
+
+    @Override
+    public boolean openVideo() {
+        return false;
+    }
+
+    @Override
+    public void setVFreez(int mode) {
+
+    }
+
+    @Override
     public boolean open(String url) {
         if (_disposablePlayer && _hasAnyState(PS_PREPARED | PS_PREPARING | PS_ERROR)) {
             _disposePlayer();
@@ -313,7 +415,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
 
         if (_hasAnyState(PS_REBUILD | PS_RELEASED)) {
             _changeState(PS_REBUILD | PS_RELEASED | PS_PREPARED | PS_PREPARING | PS_STOPPED | PS_ERROR, 0);
-            _createMusicPlayer();
+            _createMediaPlayer();
         }
 
         MediaPlayer mp = _mp;
@@ -327,7 +429,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
                 mp.reset();
             }
             mp.setDataSource(_ctx, Uri.parse(_url));
-            _changeState(PS_BUFFERING | PS_PREPARED | PS_UNINITIALIZED, PS_PREPARING);
+            _changeState(PS_BUFFERING | PS_PREPARED, PS_PREPARING);
             if (!_hasState(PS_UNINITIALIZED)) {
                 mp.prepareAsync();
             }
@@ -340,18 +442,13 @@ public class AndroidMusicPlayer implements IMusicPlayer {
     }
 
     @Override
-    public void loop(boolean loop) {
-        if(_mp != null){
-            _mp.setLooping(loop);
-        }
+    public boolean open(Locator url) {
+        return false;
     }
 
     @Override
-    public long getDuration() {
-        if (_hasState(PS_PREPARED)) {
-            return _mp.getDuration();
-        }
-        return 0;
+    public boolean releasePlayer() {
+        return false;
     }
 
     @Override
@@ -366,16 +463,33 @@ public class AndroidMusicPlayer implements IMusicPlayer {
             mp.setDisplay(null);
             mp.release();
         }
+
     }
 
     @Override
-    public void setEventListener(IMusicPlayerEvents listener) {
+    public void updateProgress() {
+        MediaPlayer player = _mp;
+        IMediaPlayerEvents listener = _listener;
+        if (player == null || listener == null) {
+            return;
+        }
+        if (_hasAnyState(PS_STOPPED | PS_RELEASED | PS_SEEKING | PS_UNINITIALIZED)) {
+            return;
+        }
+        if (!_hasState(PS_PREPARED | PS_PLAYING)) {
+            return;
+        }
+        listener.onProgress(this, getCurrentPosition());
+    }
+
+    @Override
+    public boolean sendCommand(String cmd, Bundle extInfo) {
+        return false;
+    }
+
+    @Override
+    public void setEventListener(IMediaPlayerEvents listener) {
         _listener = listener;
-    }
-
-    @Override
-    public void removeEventListener(IMusicPlayerEvents listener) {
-        _listener = null;
     }
 
     @Override
@@ -383,13 +497,7 @@ public class AndroidMusicPlayer implements IMusicPlayer {
         return _mp != null && _hasState(PS_PLAYING | PS_PREPARED) && !_hasAnyState(PS_STOPPED | PS_UNINITIALIZED | PS_RELEASED);
     }
 
-    @Override
-    public PlayerTag getPlayTag() {
-        return tag;
-    }
-
-    @Override
-    public void setPlayTag(PlayerTag tag) {
-        this.tag = tag;
+    public void setMediaPlaerSurface(Surface surface){
+        _onInitialized( surface );
     }
 }

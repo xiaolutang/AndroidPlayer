@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.txl.player.android.music;
+package com.txl.player.music;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;

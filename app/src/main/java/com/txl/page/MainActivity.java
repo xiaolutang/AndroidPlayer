@@ -14,8 +14,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.txl.android.player.R;
-import com.txl.player.android.music.IMusicPlayer;
-import com.txl.player.android.music.IMusicPlayerController;
+import com.txl.player.music.IMusicPlayer;
+import com.txl.player.music.IMusicPlayerController;
 import com.txl.demo.AndroidMusicPlayerService;
 import com.txl.demo.DemoMusicPlayerController;
 import com.txl.demo.MusicData;

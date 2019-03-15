@@ -14,6 +14,7 @@ interface IMusicPlayerController {
     void pause();
     void stop();
     void destroyPlayer();
+    long getPlayPosition();
     /**
      * 发送命令做一些自定义操作
      * */
@@ -22,4 +23,9 @@ interface IMusicPlayerController {
     void addPlayerEventListener(IMusicPlayer.IMusicPlayerEvents listener);
 
     void removePlayerEventListener(IMusicPlayer.IMusicPlayerEvents listener);
+
+    /**
+     * 获取当前播放器
+     * */
+    IMusicPlayer getCurrentPlayer();
 }

@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -39,8 +38,8 @@ import com.txl.player.android.player.R;
  * Keeps track of a notification and updates it automatically for a given MediaSession. This is
  * required so that the music service don't get killed during playback.
  */
-public abstract class MediaNotificationStrategy implements INotificationStrategy{
-    private static final String TAG = MediaNotificationStrategy.class.getSimpleName();
+public abstract class MediaNotificationManager implements INotificationStrategy{
+    private static final String TAG = MediaNotificationManager.class.getSimpleName();
     public static final int NOTIFICATION_ID = 499;
     private static final int REQUEST_CODE = 521;
 
@@ -49,7 +48,7 @@ public abstract class MediaNotificationStrategy implements INotificationStrategy
     private final NotificationManager mNotificationManager;
     private final String CHANNEL_ID;
 
-    public MediaNotificationStrategy(Context context) {
+    public MediaNotificationManager(Context context) {
         mContext = context;
         CHANNEL_ID = context.getPackageName();
         mNotificationManager =
@@ -58,6 +57,10 @@ public abstract class MediaNotificationStrategy implements INotificationStrategy
 
     public NotificationManager getNotificationManager() {
         return mNotificationManager;
+    }
+
+    public int getNotificationId(){
+        return NOTIFICATION_ID;
     }
 
     public Notification getNotification( @DrawableRes int logoRes, @DrawableRes int toggleRes, String musicName) {

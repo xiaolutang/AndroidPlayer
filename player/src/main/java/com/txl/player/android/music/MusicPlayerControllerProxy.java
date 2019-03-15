@@ -45,6 +45,11 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
+    public long getPlayPosition() {
+        return playerController.getPlayPosition();
+    }
+
+    @Override
     public void sendCommand(String action, Object... o) {
         playerController.sendCommand(action,o);
     }
@@ -58,6 +63,11 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     @Override
     public void removePlayerEventListener(IMusicPlayer.IMusicPlayerEvents listener) {
         playerController.removePlayerEventListener( listener );
+    }
+
+    @Override
+    public IMusicPlayer getCurrentPlayer() {
+        return playerController.getCurrentPlayer();
     }
 
 

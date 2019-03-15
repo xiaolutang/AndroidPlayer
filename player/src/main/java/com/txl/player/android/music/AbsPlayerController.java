@@ -1,6 +1,5 @@
 package com.txl.player.android.music;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.util.Log;
 
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public abstract class AbsPlayerController implements IMusicPlayerController, IMusicPlayer.IMusicPlayerEvents {
     protected final String TAG = getClass().getSimpleName();
-    MediaNotificationStrategy notificationManager;
+    MediaNotificationManager notificationManager;
     Context _mContext;
     IMusicPlayer _musicPlayer;
     List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
@@ -23,15 +22,28 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
         _eventsList = new ArrayList<>(  );
         _musicPlayer = createMusicPlayer();
         _musicPlayer.setEventListener( this );
-        notificationManager = new MediaNotificationStrategy(context){};
+        notificationManager = new MediaNotificationManager(context){};
     }
 
     protected IMusicPlayer createMusicPlayer() {
         return new AndroidMusicPlayer( _mContext, true, true);
     }
 
-    public MediaNotificationStrategy getNotificationManager() {
+    public MediaNotificationManager getNotificationManager() {
         return notificationManager;
+    }
+
+    @Override
+    public long getPlayPosition() {
+        if(_musicPlayer.isPlaying()){
+            return _musicPlayer.getCurrentPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public IMusicPlayer getCurrentPlayer() {
+        return _musicPlayer;
     }
 
     @Override
@@ -52,6 +64,8 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     @Override
     public void destroyPlayer() {
         _musicPlayer.destroy();
+        _musicPlayer = null;
+        _eventsList.clear();
     }
 
     @Override

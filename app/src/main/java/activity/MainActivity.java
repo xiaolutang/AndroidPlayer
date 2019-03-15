@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
         imagePreMusic.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                seekBar.setProgress(0);
                 musicPlayerController.playPre();
             }
         } );
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
         imageNextMusic.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                seekBar.setProgress(0);
                 musicPlayerController.playNext();
             }
         } );
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
             public void onStopTrackingTouch(SeekBar seekBar) {
                 Log.d(TAG,"onStopTrackingTouch  ");
                 if(duration != 0){
-                    long pos = seekBar.getProgress()*duration/100;
+                    long pos = seekBar.getProgress()*1000;
                     musicPlayerController.seek(pos);
                 }
             }
@@ -143,8 +145,6 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
 
     @Override
     public boolean onPrepared(IMusicPlayer player) {
-        duration = musicPlayerController.getDuration();
-        seekBar.setMax((int) duration);
         return false;
     }
 
@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
     @Override
     public boolean onProgress(IMusicPlayer player, long pos, long total) {
         if(total != 0){
+            duration = total/1000;
             seekBar.setMax((int) (total/1000));
             seekBar.setProgress((int) (pos/1000));
         }else {

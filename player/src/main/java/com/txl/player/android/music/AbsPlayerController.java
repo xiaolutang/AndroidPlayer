@@ -1,6 +1,8 @@
 package com.txl.player.android.music;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -12,11 +14,19 @@ import java.util.List;
  */
 public abstract class AbsPlayerController implements IMusicPlayerController, IMusicPlayer.IMusicPlayerEvents {
     protected final String TAG = getClass().getSimpleName();
+
+    final int MESSAGE_UPDATE_TIME = 0x01;
     private MediaNotificationManager notificationManager;
     private Context _mContext;
     private List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
 
+    /**
+     * 每500毫秒查询一次
+     * */
+    protected int checkCurrentPositionDelayTime = 500;
+
     protected IMusicPlayer _musicPlayer;
+    protected Handler handler;
 
     public AbsPlayerController(Context context) {
         _mContext = context;
@@ -25,6 +35,31 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
         _musicPlayer.setEventListener( this );
         _musicPlayer.init();
         notificationManager = createMediaNotificationManager(context);
+        handler = new Handler(context.getMainLooper()){
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what){
+                    case MESSAGE_UPDATE_TIME:
+                        updateTime();
+                        return;
+                    default:
+                        if(handleOtherMessage(msg)){
+                            return;
+                        }
+                }
+                super.handleMessage(msg);
+            }
+        };
+    }
+
+    protected boolean handleOtherMessage(Message msg){
+        return false;
+    }
+
+    protected void updateTime(){
+        long position = _musicPlayer.getCurrentPosition();
+        onProgress(_musicPlayer,position);
+        handler.sendEmptyMessageDelayed(MESSAGE_UPDATE_TIME, checkCurrentPositionDelayTime);
     }
 
     protected IMusicPlayer createMusicPlayer() {
@@ -52,6 +87,12 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     }
 
     @Override
+    public void seek(long pos) {
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
+        _musicPlayer.seekTo(pos);
+    }
+
+    @Override
     public boolean isPlaying() {
         return _musicPlayer.isPlaying();
     }
@@ -62,6 +103,11 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
             return _musicPlayer.getCurrentPosition();
         }
         return 0;
+    }
+
+    @Override
+    public long getDuration() {
+        return _musicPlayer.getDuration();
     }
 
     @Override
@@ -89,6 +135,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public void destroyPlayer() {
+        handler.removeCallbacksAndMessages(null);
         _musicPlayer.destroy();
         _musicPlayer = null;
         _eventsList.clear();
@@ -111,6 +158,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     @Override
     public boolean onError(IMusicPlayer player, int code, String msg) {
         Log.d( TAG,"MusicPlayer onError code: "+code +" msg : "+msg);
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onError( player,code,msg );
         }
@@ -128,6 +176,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     @Override
     public boolean onSeekComplete(IMusicPlayer player, long pos) {
         Log.i( TAG,"MusicPlayer onSeekComplete pos: "+pos );
+        updateTime();
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onSeekComplete( player,pos );
         }
@@ -136,6 +185,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public boolean onComplete(IMusicPlayer player) {
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onComplete( player );
         }
@@ -160,6 +210,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public void onMusicServiceDestroy(IMusicPlayer player) {
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onMusicServiceDestroy( player);
         }
@@ -167,6 +218,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public boolean onPlay(IMusicPlayer player) {
+        handler.sendEmptyMessage(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onPlay( player);
         }
@@ -175,6 +227,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public boolean onPause(IMusicPlayer player) {
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onPause( player);
         }
@@ -183,6 +236,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public boolean onStop(IMusicPlayer player) {
+        handler.removeMessages(MESSAGE_UPDATE_TIME);
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onStop( player);
         }

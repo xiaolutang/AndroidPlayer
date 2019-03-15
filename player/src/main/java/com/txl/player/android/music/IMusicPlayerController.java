@@ -21,6 +21,8 @@ public interface IMusicPlayerController {
     boolean isPlaying();
     void destroyPlayer();
     long getPlayPosition();
+    long getDuration();
+    void seek(long pos);
     /**
      * 设置播放模式，
      * 单曲循环

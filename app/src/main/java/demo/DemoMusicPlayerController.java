@@ -49,7 +49,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
         musicData = new ArrayList<>(  );
         //需要自己处理播放地址，这个地址仅限当天有效
         musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903132339/d4f8bcfe9e2a0fdacf26617fa3d1ad07/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
-        musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903132343/8d519e70134a078de8cbe588317bfe7d/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
+        musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903151358/78fb0db08ab4f9959411ed1d825ad9b3/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
     }
 
     @Override

@@ -347,6 +347,14 @@ public class AndroidMusicPlayer implements IMusicPlayer {
     }
 
     @Override
+    public long getDuration() {
+        if (_hasState(PS_PREPARED)) {
+            return _mp.getDuration();
+        }
+        return 0;
+    }
+
+    @Override
     public void destroy() {
         _changeState(_playerState, PS_UNINITIALIZED);
         MediaPlayer mp = _mp;

@@ -16,27 +16,10 @@ import android.util.Log;
 public abstract class AbsMusicPlayerService extends Service implements IMusicPlayer.IMusicPlayerEvents {
     protected final String TAG = getClass().getSimpleName();
 
-    final int MESSAGE_UPDATE_TIME = 0x01;
-    /**
-     * 每500毫秒查询一次
-     * */
-    protected int checkCurrentPositionDelayTime = 500;
-
     protected boolean showNotification = true;
     IMusicPlayerController musicPlayerController;
     MusicPlayerControllerProxy playerControllerProxy;
     protected MediaNotificationManager notificationManager;
-    private Handler handler;
-
-    protected void updateTime(){
-        long position = playerControllerProxy.getPlayPosition();
-        onProgress(musicPlayerController.getCurrentPlayer(),position);
-        handler.sendEmptyMessageDelayed(MESSAGE_UPDATE_TIME, checkCurrentPositionDelayTime);
-    }
-
-    protected boolean handleOtherMessage(Message msg){
-        return false;
-    }
 
     public AbsMusicPlayerService() {
 
@@ -45,21 +28,6 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     @Override
     public void onCreate() {
         super.onCreate();
-        handler = new Handler(getMainLooper()){
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what){
-                    case MESSAGE_UPDATE_TIME:
-                        updateTime();
-                        return;
-                    default:
-                        if(handleOtherMessage(msg)){
-                            return;
-                        }
-                }
-                super.handleMessage(msg);
-            }
-        };
         musicPlayerController =  createPlayerController();
         musicPlayerController.addPlayerEventListener( this );
         notificationManager = getNotificationManager(this);
@@ -83,14 +51,12 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
 
     @Override
     public void onDestroy() {
-        handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 
     @Override
     public boolean onError(IMusicPlayer xmp, int code, String msg) {
         notificationManager.removeNotification();
-        handler.removeMessages(MESSAGE_UPDATE_TIME);
         return true;
     }
 
@@ -102,13 +68,11 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     @Override
     public boolean onSeekComplete(IMusicPlayer player, long pos) {
         Notification notification = notificationManager.createPlayNotification();
-        updateTime();
         return checkAndStartNotification(notification, "onSeekComplete notification is null");
     }
 
     @Override
     public boolean onComplete(IMusicPlayer player) {
-        handler.removeMessages(MESSAGE_UPDATE_TIME);
         return checkAndStartNotification(notificationManager.createPauseNotification(), "onComplete notification is null");
     }
 
@@ -131,30 +95,27 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
 
     @Override
     public boolean onProgress(IMusicPlayer player, long pos) {
+
         return checkAndStartNotification(notificationManager.createSeekNotification(pos), "onProgress notification is null");
     }
 
     @Override
     public void onMusicServiceDestroy(IMusicPlayer player) {
-        handler.removeMessages(MESSAGE_UPDATE_TIME);
         stopForeground(true);
     }
 
     @Override
     public boolean onPlay(IMusicPlayer player) {
-        handler.sendEmptyMessage(MESSAGE_UPDATE_TIME);
         return checkAndStartNotification(notificationManager.createPlayNotification(), "onPlay notification is null");
     }
 
     @Override
     public boolean onPause(IMusicPlayer player) {
-        handler.removeMessages(MESSAGE_UPDATE_TIME);
         return checkAndStartNotification( notificationManager.createPauseNotification(), "onPause notification is null");
     }
 
     @Override
     public boolean onStop(IMusicPlayer player) {
-        handler.removeMessages(MESSAGE_UPDATE_TIME);
         return checkAndStartNotification( notificationManager.createPauseNotification(), "onPause notification is null");
     }
 }

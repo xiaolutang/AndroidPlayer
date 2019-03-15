@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
     ImageView imageMusicAuthorIcon;
     SeekBar seekBar;
 
+    long duration = 0;
+
     ServiceConnection serviceConnection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +93,26 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
             }
         } );
         seekBar = findViewById(R.id.music_seek_bar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d(TAG,"onProgressChanged  progress :"+progress+"  fromUser: "+fromUser);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG,"onStartTrackingTouch  ");
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG,"onStopTrackingTouch  ");
+                if(duration != 0){
+                    long pos = seekBar.getProgress()+duration/100;
+                    musicPlayerController.seek(pos);
+                }
+            }
+        });
     }
 
     private void togglePlayerUi(boolean isPlay){
@@ -121,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
 
     @Override
     public boolean onPrepared(IMusicPlayer player) {
+        duration = musicPlayerController.getDuration();
         return false;
     }
 
@@ -142,7 +165,11 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
 
     @Override
     public boolean onProgress(IMusicPlayer player, long pos) {
-        seekBar.setProgress((int) pos);
+        if(duration != 0){
+            seekBar.setProgress((int) (100*pos/duration));
+        }else {
+            duration = musicPlayerController.getDuration();
+        }
         return false;
     }
 

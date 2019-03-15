@@ -65,6 +65,16 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
+    public long getDuration() {
+        return playerController.getDuration();
+    }
+
+    @Override
+    public void seek(long pos) {
+        playerController.seek(pos);
+    }
+
+    @Override
     public void setPlayMode(int mode) {
         playerController.setPlayMode(mode);
     }

@@ -257,6 +257,11 @@ public abstract class AbsPlayerService extends Service {
         }
 
         @Override
+        public long getDuration() {
+            return 0;
+        }
+
+        @Override
         public void destroy() {
             absPlayerService.clearPlayerEventListener();
             absPlayerService = null;

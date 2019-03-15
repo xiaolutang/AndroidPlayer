@@ -21,6 +21,8 @@ public interface IMusicPlayer {
 
     void loop(boolean loop);
 
+    long getDuration();
+
     void destroy();
 
     void setEventListener(IMusicPlayerEvents listener);

@@ -3,6 +3,6 @@
     >
 
     <application>
-        <service android:name="com.txl.player.android.music.AndroidMusicPlayerService" />
+
     </application>
 </manifest>

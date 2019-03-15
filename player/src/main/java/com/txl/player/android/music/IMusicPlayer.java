@@ -19,6 +19,8 @@ public interface IMusicPlayer {
 
     boolean open(String url);
 
+    void loop(boolean loop);
+
     void destroy();
 
     void setEventListener(IMusicPlayerEvents listener);
@@ -61,6 +63,9 @@ public interface IMusicPlayer {
 
         boolean onStop(IMusicPlayer player);
 
-        boolean otherThings(String action, Object... o);
+        /**
+         * 接收controller发出的一些事件
+         * */
+        boolean onReceiveControllerCommand(String action, Object... o);
     }
 }

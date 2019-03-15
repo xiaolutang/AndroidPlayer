@@ -1,28 +1,28 @@
 package activity;
 
-import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.txl.android.player.R;
-import com.txl.player.android.AbsMusicPlayerController;
-import com.txl.player.android.music.AndroidMusicPlayerService;
-import com.txl.player.android.music.IPlayerUi;
-import com.txl.player.android.music.PlayerTag;
+import com.txl.player.android.music.IMusicPlayer;
+import com.txl.player.android.music.IMusicPlayerController;
+import demo.AndroidMusicPlayerService;
+import demo.DemoMusicPlayerController;
+import demo.MusicData;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import model.MusicData;
-
-public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicData> {
-    AbsMusicPlayerController musicPlayerController;
-
+public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMusicPlayerEvents{
+    protected final String TAG = getClass().getSimpleName();
+    IMusicPlayerController musicPlayerController;
     /**
      * 名字
      * */
@@ -31,14 +31,35 @@ public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicDa
     ImageView imageNextMusic;
     ImageView imageToggleMusic;
     ImageView imageMusicAuthorIcon;
+    SeekBar seekBar;
 
+    ServiceConnection serviceConnection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
         initView();
-        musicPlayerController = new MusicPlayerController(this, AndroidMusicPlayerService.class);
-        musicPlayerController.setPlayerUiChangeListener(this);
+        Intent intent = new Intent();
+        intent.setClass(this,AndroidMusicPlayerService.class);
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if(service instanceof IMusicPlayerController){
+                    musicPlayerController = (IMusicPlayerController) service;
+                    musicPlayerController.addPlayerEventListener(MainActivity.this);
+                    //在使用之前需要初始化一下
+                    musicPlayerController.init(null);
+                }else {
+                    Log.e(TAG,"serviceConnection musicPlayerController init error unBind service");
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                musicPlayerController.removePlayerEventListener(MainActivity.this);
+            }
+        };
+        bindService(intent, serviceConnection,Context.BIND_AUTO_CREATE);
     }
 
     private void initView() {
@@ -62,9 +83,14 @@ public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicDa
         imageToggleMusic.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                musicPlayerController.togglePlay();
+               if(musicPlayerController.isPlaying()){
+                   musicPlayerController.pause();
+               }else {
+                   musicPlayerController.play();
+               }
             }
         } );
+        seekBar = findViewById(R.id.music_seek_bar);
     }
 
     private void togglePlayerUi(boolean isPlay){
@@ -78,93 +104,84 @@ public class MainActivity extends AppCompatActivity implements IPlayerUi<MusicDa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        musicPlayerController.destroy();
+        unbindService(serviceConnection);
         musicPlayerController = null;
     }
+
+    private void changePageUi(MusicData musicData){
+        tvMusicName.setText(musicData.getMusicName());
+        imageMusicAuthorIcon.setImageResource(musicData.getPlayerUserIconResId());
+    }
+
     @Override
-    public void uiPause() {
+    public boolean onError(IMusicPlayer xmp, int code, String msg) {
         togglePlayerUi(false);
+        return false;
     }
 
     @Override
-    public void uiPlay() {
+    public boolean onPrepared(IMusicPlayer player) {
+        return false;
+    }
+
+    @Override
+    public boolean onSeekComplete(IMusicPlayer player, long pos) {
+        return false;
+    }
+
+    @Override
+    public boolean onComplete(IMusicPlayer player) {
+        togglePlayerUi(false);
+        return false;
+    }
+
+    @Override
+    public boolean onBuffering(IMusicPlayer player, boolean buffering, float percentage) {
+        return false;
+    }
+
+    @Override
+    public boolean onProgress(IMusicPlayer player, long pos) {
+        seekBar.setProgress((int) pos);
+        return false;
+    }
+
+    @Override
+    public void onMusicServiceDestroy(IMusicPlayer player) {
+
+    }
+
+    @Override
+    public boolean onPlay(IMusicPlayer player) {
         togglePlayerUi(true);
+        return false;
     }
 
     @Override
-    public void updateProgress(long position) {
-
+    public boolean onPause(IMusicPlayer player) {
+        togglePlayerUi(false);
+        return false;
     }
 
     @Override
-    public void changePlayerUiData(MusicData data) {
-        tvMusicName.setText( data.getMusicName() );
-        imageMusicAuthorIcon.setImageResource( data.getPlayerUserIconResId() );
+    public boolean onStop(IMusicPlayer player) {
+        togglePlayerUi(false);
+        return false;
     }
 
-    class MusicPlayerController extends AbsMusicPlayerController{
-
-        List<MusicData> musicData;
-        int currentPlayIndex = 0;
-
-        /**
-         * @param context
-         * @param serviceClass 服务的class
-         */
-        public MusicPlayerController(Context context, Class<? extends Service> serviceClass) {
-            super( context, serviceClass );
+    @Override
+    public boolean onReceiveControllerCommand(String action, Object... o) {
+        switch (action){
+            case DemoMusicPlayerController.ACTION_PLAY_NEXT:
+            case DemoMusicPlayerController.ACTION_PLAY_PRE:
+                if(o != null && o.length > 0){
+                    MusicData musicData = (MusicData) o[0];
+                    changePageUi(musicData);
+                }
+                break;
+            default:
+                break;
         }
-
-        @Override
-        protected void serviceConnect() {
-            super.serviceConnect();
-            prepareMusicData();
-            PlayerTag tag = new PlayerTag(musicData.get( currentPlayIndex ).getPlayUrl());
-            if(!tag.equals( getPlayTag() )){
-                initPlayer(tag);
-                open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
-                changePlayerUiData( musicData.get( currentPlayIndex ) );
-            }else {
-                togglePlayerUi( isPlay() );
-            }
-        }
-
-        /**
-         * 在controller中实现播放器数据相关的处理
-         * */
-        private void prepareMusicData(){
-            musicData = new ArrayList<>(  );
-            //需要自己处理播放地址，这个地址仅限当天有效
-            musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903132339/d4f8bcfe9e2a0fdacf26617fa3d1ad07/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
-            musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903132343/8d519e70134a078de8cbe588317bfe7d/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
-
-        }
-
-        @Override
-        protected Intent getBindServiceIntent() {
-            Intent intent = new Intent(  );
-            return intent;
-        }
-
-        @Override
-        public void playNext() {
-            currentPlayIndex ++;
-            currentPlayIndex = currentPlayIndex % musicData.size();
-            PlayerTag tag = new PlayerTag(musicData.get( currentPlayIndex ).getPlayUrl());
-            open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
-            changePlayerUiData( musicData.get( currentPlayIndex ) );
-        }
-
-        @Override
-        public void playPre() {
-            if(currentPlayIndex == 0){
-                currentPlayIndex = musicData.size()-1;
-            }else {
-                currentPlayIndex--;
-            }
-            PlayerTag tag = new PlayerTag(musicData.get( currentPlayIndex ).getPlayUrl());
-            open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
-            changePlayerUiData( musicData.get( currentPlayIndex ) );
-        }
+        return false;
     }
 }

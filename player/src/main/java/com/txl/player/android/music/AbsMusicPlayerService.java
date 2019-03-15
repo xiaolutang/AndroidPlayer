@@ -2,6 +2,7 @@ package com.txl.player.android.music;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,21 +26,7 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     IMusicPlayerController musicPlayerController;
     MusicPlayerControllerProxy playerControllerProxy;
     protected MediaNotificationManager notificationManager;
-    private Handler handler = new Handler(getMainLooper()){
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what){
-                case MESSAGE_UPDATE_TIME:
-                    updateTime();
-                    return;
-                default:
-                    if(handleOtherMessage(msg)){
-                        return;
-                    }
-            }
-            super.handleMessage(msg);
-        }
-    };
+    private Handler handler;
 
     protected void updateTime(){
         long position = playerControllerProxy.getPlayPosition();
@@ -52,14 +39,35 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     }
 
     public AbsMusicPlayerService() {
-        musicPlayerController =  createPlayerController();
-        musicPlayerController.addPlayerEventListener( this );
-        playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);
-        notificationManager = getNotificationManager();
+
     }
 
-    abstract IMusicPlayerController createPlayerController();
-    abstract MediaNotificationManager getNotificationManager();
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        handler = new Handler(getMainLooper()){
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what){
+                    case MESSAGE_UPDATE_TIME:
+                        updateTime();
+                        return;
+                    default:
+                        if(handleOtherMessage(msg)){
+                            return;
+                        }
+                }
+                super.handleMessage(msg);
+            }
+        };
+        musicPlayerController =  createPlayerController();
+        musicPlayerController.addPlayerEventListener( this );
+        notificationManager = getNotificationManager(this);
+        playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);
+    }
+
+    protected abstract IMusicPlayerController createPlayerController();
+    protected abstract MediaNotificationManager getNotificationManager(Context context);
 
     public void setShowNotification(boolean showNotification) {
         this.showNotification = showNotification;
@@ -71,6 +79,12 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
             playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);
         }
         return playerControllerProxy;
+    }
+
+    @Override
+    public void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 
     @Override

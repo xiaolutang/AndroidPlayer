@@ -176,6 +176,11 @@ public abstract class AbsPlayerService extends Service {
             }
             return true;
         }
+
+        @Override
+        public boolean onReceiveControllerCommand(String action, Object... o) {
+            return false;
+        }
     }
 
     public static class PlayerAdapter extends Binder implements IMusicPlayer,INotification{
@@ -244,6 +249,11 @@ public abstract class AbsPlayerService extends Service {
         public boolean open(String url) {
             absPlayerService._mPlayer.open(url);
             return true;
+        }
+
+        @Override
+        public void loop(boolean loop) {
+
         }
 
         @Override

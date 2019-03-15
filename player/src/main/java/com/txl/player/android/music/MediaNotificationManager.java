@@ -97,7 +97,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
         final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
         final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
         normalRemoteViews.setImageViewResource(R.id.ib_toggle,toggleRes);
-        normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle,createStopIntent());
+        normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
         normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
         if(logoBitmap!= null){
             normalRemoteViews.setImageViewBitmap(R.id.image_icon,logoBitmap);
@@ -117,7 +117,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
         return builder;
     }
 
-    protected PendingIntent createStopIntent() {
+    protected PendingIntent createToggleIntent() {
         return null;
     }
 
@@ -163,8 +163,8 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
             }
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
-            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
-            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle,createStopIntent());
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
 //            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
 
             builder
@@ -178,7 +178,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
                     .setContentIntent(createContentIntent())
                     // Show controls on lock screen even when user hides sensitive content.
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            return null;
+            return builder.build();
         }
         return customNotificationStrategy.createPlayNotification();
     }
@@ -186,7 +186,27 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
     @Override
     public Notification createPauseNotification() {
         if(customNotificationStrategy == null){
-            return null;
+            if (isAndroidOOrHigher()) {
+                createChannel();
+            }
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+//            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
+
+            builder
+                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                    .setVibrate(new long[]{0})
+                    .setSound(null)
+                    .setCustomContentView(normalRemoteViews)
+//                    .setSmallIcon(logoRes)
+                    .setShowWhen(false)
+                    .setColor(Color.RED)//可以主动设置
+                    .setContentIntent(createContentIntent())
+                    // Show controls on lock screen even when user hides sensitive content.
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            return builder.build();
         }
         return customNotificationStrategy.createPauseNotification();
     }

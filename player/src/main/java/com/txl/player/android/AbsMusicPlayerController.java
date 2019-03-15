@@ -238,7 +238,7 @@ public abstract class AbsMusicPlayerController{
         }
 
         @Override
-        public boolean otherThings(String action, Object... o) {
+        public boolean onReceiveControllerCommand(String action, Object... o) {
             return false;
         }
 

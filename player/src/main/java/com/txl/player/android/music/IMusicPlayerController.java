@@ -8,17 +8,29 @@ import android.content.Intent;
  * date：2019/3/14
  * description：
  */
-interface IMusicPlayerController {
+public interface IMusicPlayerController {
+    /**
+     *初始化准备播放器相关的数据
+     * */
     void init(Intent initParams);
+    void playNext();
+    void playPre();
     void play();
     void pause();
     void stop();
+    boolean isPlaying();
     void destroyPlayer();
     long getPlayPosition();
     /**
-     * 发送命令做一些自定义操作
+     * 设置播放模式，
+     * 单曲循环
+     * 列表循环随机播放
      * */
-    void sendCommand(String action, Object... o);
+    void setPlayMode(int mode);
+    /**
+     * 对控制器而言，接收其他未定义的一些页面操作。比如收藏当前播放的音频，
+     * */
+    void receiveCommand(String action, Object... o);
 
     void addPlayerEventListener(IMusicPlayer.IMusicPlayerEvents listener);
 

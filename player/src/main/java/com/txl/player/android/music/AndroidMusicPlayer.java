@@ -340,6 +340,13 @@ public class AndroidMusicPlayer implements IMusicPlayer {
     }
 
     @Override
+    public void loop(boolean loop) {
+        if(_mp != null){
+            _mp.setLooping(loop);
+        }
+    }
+
+    @Override
     public void destroy() {
         _changeState(_playerState, PS_UNINITIALIZED);
         MediaPlayer mp = _mp;

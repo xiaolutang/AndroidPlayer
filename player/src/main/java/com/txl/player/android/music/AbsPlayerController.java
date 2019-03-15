@@ -12,25 +12,48 @@ import java.util.List;
  */
 public abstract class AbsPlayerController implements IMusicPlayerController, IMusicPlayer.IMusicPlayerEvents {
     protected final String TAG = getClass().getSimpleName();
-    MediaNotificationManager notificationManager;
-    Context _mContext;
-    IMusicPlayer _musicPlayer;
-    List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
+    private MediaNotificationManager notificationManager;
+    private Context _mContext;
+    private List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
+
+    protected IMusicPlayer _musicPlayer;
 
     public AbsPlayerController(Context context) {
         _mContext = context;
         _eventsList = new ArrayList<>(  );
         _musicPlayer = createMusicPlayer();
         _musicPlayer.setEventListener( this );
-        notificationManager = new MediaNotificationManager(context){};
+        _musicPlayer.init();
+        notificationManager = createMediaNotificationManager(context);
     }
 
     protected IMusicPlayer createMusicPlayer() {
         return new AndroidMusicPlayer( _mContext, true, true);
     }
 
-    public MediaNotificationManager getNotificationManager() {
-        return notificationManager;
+    public abstract MediaNotificationManager createMediaNotificationManager(Context context);
+
+
+    protected boolean open(String url){
+        return _musicPlayer.open(url);
+    }
+
+    protected boolean open(String url,PlayerTag playTag){
+        setPlayTag(playTag);
+        return _musicPlayer.open(url);
+    }
+
+    protected void setPlayTag(PlayerTag playTag){
+        _musicPlayer.setPlayTag(playTag);
+    }
+
+    protected PlayerTag getPlayTag(){
+        return _musicPlayer.getPlayTag();
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return _musicPlayer.isPlaying();
     }
 
     @Override
@@ -48,16 +71,19 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public void play() {
+        onPlay(_musicPlayer);
         _musicPlayer.play();
     }
 
     @Override
     public void pause() {
+        onPause(_musicPlayer);
         _musicPlayer.pause();
     }
 
     @Override
     public void stop() {
+        onStop(_musicPlayer);
         _musicPlayer.stop();
     }
 
@@ -159,6 +185,14 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     public boolean onStop(IMusicPlayer player) {
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onStop( player);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onReceiveControllerCommand(String action, Object... o) {
+        for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
+            event.onReceiveControllerCommand( action,o);
         }
         return true;
     }

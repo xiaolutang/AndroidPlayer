@@ -25,6 +25,16 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
+    public void playNext() {
+        playerController.playNext();
+    }
+
+    @Override
+    public void playPre() {
+        playerController.playPre();
+    }
+
+    @Override
     public void play() {
         playerController.play();
     }
@@ -40,6 +50,11 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
+    public boolean isPlaying() {
+        return playerController.isPlaying();
+    }
+
+    @Override
     public void destroyPlayer() {
         playerController.destroyPlayer();
     }
@@ -50,8 +65,13 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
-    public void sendCommand(String action, Object... o) {
-        playerController.sendCommand(action,o);
+    public void setPlayMode(int mode) {
+        playerController.setPlayMode(mode);
+    }
+
+    @Override
+    public void receiveCommand(String action, Object... o) {
+        playerController.receiveCommand(action,o);
     }
 
 

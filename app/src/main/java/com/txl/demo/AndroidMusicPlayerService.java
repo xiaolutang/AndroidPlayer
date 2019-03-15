@@ -1,11 +1,8 @@
-package demo;
+package com.txl.demo;
 
-
-import android.content.Context;
 
 import com.txl.player.android.music.AbsMusicPlayerService;
 import com.txl.player.android.music.IMusicPlayerController;
-import com.txl.player.android.music.MediaNotificationManager;
 
 /**
  * Copyright (c) 2019, 唐小陆 All rights reserved.

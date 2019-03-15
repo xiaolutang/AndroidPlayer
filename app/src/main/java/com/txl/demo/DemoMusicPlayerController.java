@@ -1,4 +1,4 @@
-package demo;
+package com.txl.demo;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -16,7 +16,7 @@ import com.txl.player.android.player.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import activity.MainActivity;
+import com.txl.page.MainActivity;
 
 
 /**
@@ -24,7 +24,7 @@ import activity.MainActivity;
  * description :
  */
 public class DemoMusicPlayerController extends AbsPlayerController {
-    private static final int REQUEST_CODE = 15968;
+    private static final int REQUEST_CODE = 1568;
     List<MusicData> musicData;
     int currentPlayIndex = 0;
 
@@ -115,7 +115,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
-            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+//            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
             normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
 
             builder
@@ -140,7 +140,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
-            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+//            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
             normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
 
             builder
@@ -158,7 +158,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
         }
 
         private PendingIntent createContentIntent() {
-            Intent intent = new Intent(mContext, MainActivity.class);
+            Intent intent = new Intent(mContext, Main2Activity.class);
             PendingIntent.getActivity(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
             return null;
         }

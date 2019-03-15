@@ -1,4 +1,4 @@
-package activity;
+package com.txl.page;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,9 +16,9 @@ import android.widget.TextView;
 import com.txl.android.player.R;
 import com.txl.player.android.music.IMusicPlayer;
 import com.txl.player.android.music.IMusicPlayerController;
-import demo.AndroidMusicPlayerService;
-import demo.DemoMusicPlayerController;
-import demo.MusicData;
+import com.txl.demo.AndroidMusicPlayerService;
+import com.txl.demo.DemoMusicPlayerController;
+import com.txl.demo.MusicData;
 
 public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMusicPlayerEvents{
     protected final String TAG = getClass().getSimpleName();

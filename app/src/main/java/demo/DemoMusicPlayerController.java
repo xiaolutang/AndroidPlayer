@@ -1,6 +1,7 @@
 package demo;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -15,12 +16,15 @@ import com.txl.player.android.player.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import activity.MainActivity;
+
 
 /**
  * @author TXL
  * description :
  */
 public class DemoMusicPlayerController extends AbsPlayerController {
+    private static final int REQUEST_CODE = 15968;
     List<MusicData> musicData;
     int currentPlayIndex = 0;
 
@@ -135,7 +139,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
             }
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
-            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
             normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
             normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
 
@@ -151,6 +155,16 @@ public class DemoMusicPlayerController extends AbsPlayerController {
                     // Show controls on lock screen even when user hides sensitive content.
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             return builder.build();
+        }
+
+        private PendingIntent createContentIntent() {
+            Intent intent = new Intent(mContext, MainActivity.class);
+            PendingIntent.getActivity(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            return null;
+        }
+
+        private PendingIntent createToggleIntent() {
+            return null;
         }
 
         @Override

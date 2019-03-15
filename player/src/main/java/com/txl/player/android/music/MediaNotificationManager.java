@@ -58,13 +58,6 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
     public void setCustomNotificationStrategy(INotificationStrategy customNotificationStrategy) {
         this.customNotificationStrategy = customNotificationStrategy;
     }
-    protected PendingIntent createToggleIntent() {
-        return null;
-    }
-
-    protected PendingIntent createContentIntent() {
-        return null;
-    }
 
     // Does nothing on versions of Android earlier than O.
     @RequiresApi(Build.VERSION_CODES.O)

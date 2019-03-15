@@ -83,6 +83,7 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
             return true;
         }
         startForeground(notificationManager.getNotificationId(), notification);
+
         return true;
     }
 

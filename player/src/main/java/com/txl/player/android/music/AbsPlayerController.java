@@ -28,6 +28,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     protected IMusicPlayer _musicPlayer;
     protected Handler handler;
 
+    private boolean seeking = false;
     public AbsPlayerController(Context context) {
         _mContext = context;
         _eventsList = new ArrayList<>(  );
@@ -57,6 +58,9 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     }
 
     protected void updateTime(){
+        if(seeking){
+            return;
+        }
         long position = _musicPlayer.getCurrentPosition();
         onProgress(_musicPlayer,position);
         handler.sendEmptyMessageDelayed(MESSAGE_UPDATE_TIME, checkCurrentPositionDelayTime);
@@ -70,10 +74,12 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
 
     protected boolean open(String url){
+        seeking = false;
         return _musicPlayer.open(url);
     }
 
     protected boolean open(String url,PlayerTag playTag){
+        seeking = false;
         setPlayTag(playTag);
         return _musicPlayer.open(url);
     }
@@ -88,6 +94,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public void seek(long pos) {
+        seeking = true;
         handler.removeMessages(MESSAGE_UPDATE_TIME);
         _musicPlayer.seekTo(pos);
     }
@@ -176,6 +183,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     @Override
     public boolean onSeekComplete(IMusicPlayer player, long pos) {
         Log.i( TAG,"MusicPlayer onSeekComplete pos: "+pos );
+        seeking = false;
         updateTime();
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onSeekComplete( player,pos );
@@ -202,6 +210,9 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     @Override
     public boolean onProgress(IMusicPlayer player, long pos) {
+        if(seeking){
+            return true;
+        }
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
             event.onProgress( player ,pos);
         }

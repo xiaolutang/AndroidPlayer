@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
             public void onStopTrackingTouch(SeekBar seekBar) {
                 Log.d(TAG,"onStopTrackingTouch  ");
                 if(duration != 0){
-                    long pos = seekBar.getProgress()+duration/100;
+                    long pos = seekBar.getProgress()*duration/100;
                     musicPlayerController.seek(pos);
                 }
             }

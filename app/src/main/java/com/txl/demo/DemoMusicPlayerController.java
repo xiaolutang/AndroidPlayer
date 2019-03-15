@@ -157,8 +157,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
 
         private PendingIntent createContentIntent() {
             Intent intent = new Intent(mContext, Main2Activity.class);
-            PendingIntent.getActivity(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
-            return null;
+            return PendingIntent.getActivity(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
         private PendingIntent createToggleIntent() {

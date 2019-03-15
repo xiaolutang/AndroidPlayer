@@ -1,4 +1,4 @@
-package com.txl.player.android;
+package com.txl.player.android.video;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;

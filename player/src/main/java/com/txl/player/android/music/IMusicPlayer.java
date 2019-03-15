@@ -52,7 +52,7 @@ public interface IMusicPlayer {
 
         boolean onBuffering(IMusicPlayer player, boolean buffering, float percentage);
 
-        boolean onProgress(IMusicPlayer player, long pos);
+        boolean onProgress(IMusicPlayer player, long pos, long total);
 
         /**
          * 音频服务destroy

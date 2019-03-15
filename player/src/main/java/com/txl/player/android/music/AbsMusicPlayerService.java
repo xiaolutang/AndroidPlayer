@@ -94,7 +94,7 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     }
 
     @Override
-    public boolean onProgress(IMusicPlayer player, long pos) {
+    public boolean onProgress(IMusicPlayer player, long pos, long total) {
 
         return checkAndStartNotification(notificationManager.createSeekNotification(pos), "onProgress notification is null");
     }

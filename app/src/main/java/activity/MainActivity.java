@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
     @Override
     public boolean onPrepared(IMusicPlayer player) {
         duration = musicPlayerController.getDuration();
+        seekBar.setMax((int) duration);
         return false;
     }
 
@@ -164,9 +165,10 @@ public class MainActivity extends AppCompatActivity implements IMusicPlayer.IMus
     }
 
     @Override
-    public boolean onProgress(IMusicPlayer player, long pos) {
-        if(duration != 0){
-            seekBar.setProgress((int) (100*pos/duration));
+    public boolean onProgress(IMusicPlayer player, long pos, long total) {
+        if(total != 0){
+            seekBar.setMax((int) (total/1000));
+            seekBar.setProgress((int) (pos/1000));
         }else {
             duration = musicPlayerController.getDuration();
         }

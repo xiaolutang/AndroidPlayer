@@ -41,7 +41,7 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
 
     @Override
     public void pause() {
-        playerController.play();
+        playerController.pause();
     }
 
     @Override

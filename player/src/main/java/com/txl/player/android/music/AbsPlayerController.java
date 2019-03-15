@@ -62,7 +62,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
             return;
         }
         long position = _musicPlayer.getCurrentPosition();
-        onProgress(_musicPlayer,position);
+        onProgress(_musicPlayer,position,_musicPlayer.getDuration());
         handler.sendEmptyMessageDelayed(MESSAGE_UPDATE_TIME, checkCurrentPositionDelayTime);
     }
 
@@ -209,12 +209,12 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     }
 
     @Override
-    public boolean onProgress(IMusicPlayer player, long pos) {
+    public boolean onProgress(IMusicPlayer player, long pos, long total) {
         if(seeking){
             return true;
         }
         for (IMusicPlayer.IMusicPlayerEvents event:_eventsList){
-            event.onProgress( player ,pos);
+            event.onProgress( player ,pos,total);
         }
         return true;
     }

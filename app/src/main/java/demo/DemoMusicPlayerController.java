@@ -1,7 +1,11 @@
 package demo;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.support.v4.app.NotificationCompat;
+import android.widget.RemoteViews;
 
 import com.txl.player.android.music.AbsPlayerController;
 import com.txl.player.android.music.MediaNotificationManager;
@@ -29,7 +33,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
 
     @Override
     public MediaNotificationManager createMediaNotificationManager(Context context) {
-        return null;
+        return new DemoMediaNotificationFactory(context);
     }
 
     @Override
@@ -88,5 +92,75 @@ public class DemoMusicPlayerController extends AbsPlayerController {
     @Override
     public void receiveCommand(String action, Object... o) {
 
+    }
+
+    /**
+     * @author TXL
+     * description :
+     */
+    public class DemoMediaNotificationFactory extends MediaNotificationManager {
+        public DemoMediaNotificationFactory(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Notification createPlayNotification() {
+            if (isAndroidOOrHigher()) {
+                createChannel();
+            }
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
+
+            builder
+                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                    .setVibrate(new long[]{0})
+                    .setSound(null)
+                    .setCustomContentView(normalRemoteViews)
+                    .setSmallIcon(R.drawable.easy_player_icon)
+                    .setShowWhen(false)
+                    .setColor(Color.RED)//可以主动设置
+                    .setContentIntent(createContentIntent())
+                    // Show controls on lock screen even when user hides sensitive content.
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            return builder.build();
+        }
+
+        @Override
+        public Notification createPauseNotification() {
+            if (isAndroidOOrHigher()) {
+                createChannel();
+            }
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
+            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
+            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
+
+            builder
+                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                    .setVibrate(new long[]{0})
+                    .setSound(null)
+                    .setCustomContentView(normalRemoteViews)
+                    .setSmallIcon(R.drawable.easy_player_icon)
+                    .setShowWhen(false)
+                    .setColor(Color.RED)//可以主动设置
+                    .setContentIntent(createContentIntent())
+                    // Show controls on lock screen even when user hides sensitive content.
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            return builder.build();
+        }
+
+        @Override
+        public Notification createSeekNotification(long pos) {
+            return null;
+        }
+
+        @Override
+        public Notification createOtherNotification(String action, Object... o) {
+            return null;
+        }
     }
 }

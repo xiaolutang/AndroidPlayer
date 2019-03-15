@@ -16,23 +16,15 @@
 
 package com.txl.player.android.music;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
 
 import android.util.Log;
-import android.widget.RemoteViews;
-
-import com.txl.player.android.player.R;
-
 
 /**
  * Keeps track of a notification and updates it automatically for a given MediaSession. This is
@@ -42,10 +34,10 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
     private static final String TAG = MediaNotificationManager.class.getSimpleName();
     public static final int NOTIFICATION_ID = 499;
 
-    private INotificationStrategy customNotificationStrategy;
-    private final Context mContext;
+    protected INotificationStrategy customNotificationStrategy;
+    protected final Context mContext;
     private final NotificationManager mNotificationManager;
-    private final String CHANNEL_ID;
+    protected final String CHANNEL_ID;
 
     public MediaNotificationManager(Context context) {
         mContext = context;
@@ -58,6 +50,7 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
         return mNotificationManager;
     }
 
+    @Override
     public int getNotificationId(){
         return NOTIFICATION_ID;
     }
@@ -65,40 +58,6 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
     public void setCustomNotificationStrategy(INotificationStrategy customNotificationStrategy) {
         this.customNotificationStrategy = customNotificationStrategy;
     }
-
-    /**
-     * @param logoRes
-     * @param toggleRes 播放控制按钮的图标
-     * */
-    private NotificationCompat.Builder buildNotification(@DrawableRes int logoRes, @DrawableRes int toggleRes, String musicName, Bitmap logoBitmap) {
-
-        // Create the (mandatory) notification channel when running on Android Oreo.
-        if (isAndroidOOrHigher()) {
-            createChannel();
-        }
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
-        final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
-        normalRemoteViews.setImageViewResource(R.id.ib_toggle,toggleRes);
-        normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
-        normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
-        if(logoBitmap!= null){
-            normalRemoteViews.setImageViewBitmap(R.id.image_icon,logoBitmap);
-        }
-        builder
-                .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
-                .setVibrate(new long[]{0})
-                .setSound(null)
-                .setCustomContentView(normalRemoteViews)
-                .setSmallIcon(logoRes)
-                .setShowWhen(false)
-                .setColor(Color.RED)//可以主动设置
-                .setContentIntent(createContentIntent())
-                // Show controls on lock screen even when user hides sensitive content.
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-
-        return builder;
-    }
-
     protected PendingIntent createToggleIntent() {
         return null;
     }
@@ -133,80 +92,8 @@ public abstract class MediaNotificationManager implements INotificationStrategy{
         }
     }
 
-    private boolean isAndroidOOrHigher() {
+    protected boolean isAndroidOOrHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
-    }
-
-    @Override
-    public Notification createPlayNotification() {
-        if(customNotificationStrategy == null){
-            if (isAndroidOOrHigher()) {
-                createChannel();
-            }
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID+"bbb");
-            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
-            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
-            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
-//            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
-
-            builder
-                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
-                    .setVibrate(new long[]{0})
-                    .setSound(null)
-                    .setCustomContentView(normalRemoteViews)
-                    .setSmallIcon(R.drawable.easy_player_icon)
-                    .setShowWhen(false)
-                    .setColor(Color.RED)//可以主动设置
-                    .setContentIntent(createContentIntent())
-                    // Show controls on lock screen even when user hides sensitive content.
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            return builder.build();
-        }
-        return customNotificationStrategy.createPlayNotification();
-    }
-
-    @Override
-    public Notification createPauseNotification() {
-        if(customNotificationStrategy == null){
-            if (isAndroidOOrHigher()) {
-                createChannel();
-            }
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID+"aaa");
-            final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
-            normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
-            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
-//            normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicName);
-
-            builder
-                    .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
-                    .setVibrate(new long[]{0})
-                    .setSound(null)
-                    .setCustomContentView(normalRemoteViews)
-                    .setSmallIcon(R.drawable.easy_player_icon)
-                    .setShowWhen(false)
-                    .setColor(Color.RED)//可以主动设置
-                    .setContentIntent(createContentIntent())
-                    // Show controls on lock screen even when user hides sensitive content.
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            return builder.build();
-        }
-        return customNotificationStrategy.createPauseNotification();
-    }
-
-    @Override
-    public Notification createSeekNotification(long pos) {
-        if(customNotificationStrategy == null){
-            return null;
-        }
-        return customNotificationStrategy.createSeekNotification(pos);
-    }
-
-    @Override
-    public Notification createOtherNotification(String action, Object... o) {
-        if(customNotificationStrategy == null){
-            return null;
-        }
-        return customNotificationStrategy.createOtherNotification(action,o);
     }
 
 }

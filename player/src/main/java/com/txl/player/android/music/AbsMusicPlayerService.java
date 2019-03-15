@@ -30,12 +30,11 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
         super.onCreate();
         musicPlayerController =  createPlayerController();
         musicPlayerController.addPlayerEventListener( this );
-        notificationManager = getNotificationManager(this);
+        notificationManager = musicPlayerController.getNotificationManager();
         playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);
     }
 
     protected abstract IMusicPlayerController createPlayerController();
-    protected abstract MediaNotificationManager getNotificationManager(Context context);
 
     public void setShowNotification(boolean showNotification) {
         this.showNotification = showNotification;

@@ -20,12 +20,6 @@ public class AndroidMusicPlayerService extends AbsMusicPlayerService {
     }
 
     @Override
-    protected MediaNotificationManager getNotificationManager(Context context) {
-        return new MediaNotificationManager(context) {
-        };
-    }
-
-    @Override
     public boolean onReceiveControllerCommand(String action, Object... o) {
         notificationManager.createOtherNotification(action,o);
         return false;

@@ -10,6 +10,8 @@ import android.app.Notification;
  */
 public interface INotificationStrategy {
 
+    int getNotificationId();
+
     Notification createPlayNotification();
     Notification createPauseNotification();
     /**

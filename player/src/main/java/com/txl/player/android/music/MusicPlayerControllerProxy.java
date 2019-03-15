@@ -75,6 +75,11 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
+    public MediaNotificationManager getNotificationManager() {
+        return null;
+    }
+
+    @Override
     public void setPlayMode(int mode) {
         playerController.setPlayMode(mode);
     }

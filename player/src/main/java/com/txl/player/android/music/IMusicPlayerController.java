@@ -23,6 +23,7 @@ public interface IMusicPlayerController {
     long getPlayPosition();
     long getDuration();
     void seek(long pos);
+    MediaNotificationManager getNotificationManager();
     /**
      * 设置播放模式，
      * 单曲循环

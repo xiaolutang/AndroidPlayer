@@ -72,6 +72,10 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     public abstract MediaNotificationManager createMediaNotificationManager(Context context);
 
+    @Override
+    public MediaNotificationManager getNotificationManager() {
+        return notificationManager;
+    }
 
     protected boolean open(String url){
         seeking = false;

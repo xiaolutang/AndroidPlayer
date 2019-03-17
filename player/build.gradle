@@ -37,11 +37,11 @@ dependencies {
 }
 
 publish {
-    repoName = 'SimpleAndroidPlayer'
+    repoName = 'simple-android-player'
     userOrg = 'tangxiaolu'
     groupId = 'com.txl.player'
-    artifactId = 'SimpleAndroidPlayer'
-    version = '1.0.0'
+    artifactId = 'simple-android-player'
+    version = '0.0.1'
     description = 'A android music and video player can simple to use'
     website = "https://github.com/xiaolutang/AndroidPlayer"
 }

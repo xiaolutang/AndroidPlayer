@@ -41,13 +41,11 @@ public interface IMediaPlayer {
 
     /**
      * 关闭视频层，播放广播流
-     * @return
      */
     boolean closeVideo();
 
     /**
      * 打开视频层，播放视频流
-     * @return
      */
     boolean openVideo();
 

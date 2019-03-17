@@ -24,8 +24,6 @@ public interface INotificationStrategy {
      * 进度改变
      * */
     Notification createSeekNotification(long pos);
-    /**
-     * 
-     * */
+
     Notification createOtherNotification(String action, Object... o);
 }

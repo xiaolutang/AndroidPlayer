@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 28
@@ -21,7 +22,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -31,4 +34,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+publish {
+    repoName = 'SimpleAndroidPlayer'
+    userOrg = 'tangxiaolu'
+    groupId = 'com.txl.player'
+    artifactId = 'SimpleAndroidPlayer'
+    version = '1.0.0'
+    description = 'A android music and video player can simple to use'
+    website = "https://github.com/xiaolutang/AndroidPlayer"
 }

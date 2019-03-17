@@ -12,7 +12,13 @@ public interface INotificationStrategy {
 
     int getNotificationId();
 
+    /**
+     * 播放状态
+     * */
     Notification createPlayNotification();
+    /**
+     * 暂停状态
+     * */
     Notification createPauseNotification();
     /**
      * 进度改变

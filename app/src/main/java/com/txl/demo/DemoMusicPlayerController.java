@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.txl.page.MainActivity;
 import com.txl.player.music.AbsPlayerController;
 import com.txl.player.music.MediaNotificationManager;
 import com.txl.player.music.PlayerTag;
@@ -54,8 +56,8 @@ public class DemoMusicPlayerController extends AbsPlayerController {
     private void prepareMusicData(){
         musicData = new ArrayList<>(  );
         //需要自己处理播放地址，这个地址仅限当天有效
-        musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903132339/d4f8bcfe9e2a0fdacf26617fa3d1ad07/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
-        musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903151358/78fb0db08ab4f9959411ed1d825ad9b3/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
+        musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903171123/dadac9f0a31323d89246309adcecb5c5/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
+        musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903171124/91a30e730f830675816c05bba1f6707a/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
     }
 
     @Override
@@ -65,9 +67,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
         PlayerTag tag = new PlayerTag(musicData.get( currentPlayIndex ).getPlayUrl());
         open( musicData.get( currentPlayIndex ).getPlayUrl(),tag );
         onReceiveControllerCommand(ACTION_PLAY_NEXT, musicData.get( currentPlayIndex ));
-        if(isPlaying()){
-            play();
-        }
+        play();
     }
 
     @Override
@@ -81,9 +81,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
         setPlayTag(tag);
         open(musicData.get( currentPlayIndex ).getPlayUrl());
         onReceiveControllerCommand(ACTION_PLAY_PRE, musicData.get( currentPlayIndex ));
-        if(isPlaying()){
-            play();
-        }
+        play();
     }
 
     @Override
@@ -112,8 +110,19 @@ public class DemoMusicPlayerController extends AbsPlayerController {
             }
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
+            normalRemoteViews.setImageViewResource(R.id.image_icon,musicData.get(currentPlayIndex).playerUserIconResId);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_pause);
-//            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+            Intent intent = new Intent();
+            String packageName = mContext.getPackageName();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PAUSE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, pendingIntent);
+            intent = new Intent();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_PRE);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_play_pre, PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT));
+            intent = new Intent();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_NEXT);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_play_next, PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT));
             normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
 
             builder
@@ -138,7 +147,15 @@ public class DemoMusicPlayerController extends AbsPlayerController {
             final NotificationCompat.Builder builder = new NotificationCompat.Builder( mContext, CHANNEL_ID);
             final RemoteViews normalRemoteViews = new RemoteViews( mContext.getPackageName(),R.layout.normal_notification);
             normalRemoteViews.setImageViewResource(R.id.ib_toggle,R.drawable.image_play);
-//            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createToggleIntent());
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_toggle, createPauseIntent());
+            normalRemoteViews.setImageViewResource(R.id.image_icon,musicData.get(currentPlayIndex).playerUserIconResId);
+            String packageName = mContext.getPackageName();
+            Intent intent = new Intent();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_PRE);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_play_pre, PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT));
+            intent = new Intent();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_NEXT);
+            normalRemoteViews.setOnClickPendingIntent(R.id.ib_play_next, PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT));
             normalRemoteViews.setTextViewText(R.id.tv_audio_title,musicData.get(currentPlayIndex).musicName);
 
             builder
@@ -156,12 +173,16 @@ public class DemoMusicPlayerController extends AbsPlayerController {
         }
 
         private PendingIntent createContentIntent() {
-            Intent intent = new Intent(mContext, Main2Activity.class);
+            Intent intent = new Intent(mContext, MainActivity.class);
             return PendingIntent.getActivity(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
-        private PendingIntent createToggleIntent() {
-            return null;
+
+        private PendingIntent createPauseIntent(){
+            Intent intent = new Intent();
+            String packageName = mContext.getPackageName();
+            intent.setAction(packageName+MusicBroadcastReceiver.ACTION_PLAY);
+            return PendingIntent.getBroadcast(mContext,REQUEST_CODE,intent,PendingIntent.FLAG_CANCEL_CURRENT);
         }
 
         @Override

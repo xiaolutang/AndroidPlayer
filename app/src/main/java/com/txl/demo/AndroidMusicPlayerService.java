@@ -17,7 +17,8 @@ public class AndroidMusicPlayerService extends AbsMusicPlayerService {
     }
 
     @Override
-    public boolean onReceiveControllerCommand(String action, Object... o) {
+    public boolean
+    onReceiveControllerCommand(String action, Object... o) {
         notificationManager.createOtherNotification(action,o);
         return false;
     }

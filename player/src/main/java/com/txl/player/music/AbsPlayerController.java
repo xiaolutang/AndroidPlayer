@@ -1,8 +1,12 @@
 package com.txl.player.music;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -17,7 +21,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
 
     final int MESSAGE_UPDATE_TIME = 0x01;
     private MediaNotificationManager notificationManager;
-    private Context _mContext;
+    protected Context _mContext;
     private List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
 
     /**
@@ -29,6 +33,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     protected Handler handler;
 
     private boolean seeking = false;
+    private MusicBroadcastReceiver musicBroadcastReceiver;
     public AbsPlayerController(Context context) {
         _mContext = context;
         _eventsList = new ArrayList<>(  );
@@ -51,6 +56,33 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
                 super.handleMessage(msg);
             }
         };
+        initMusicBroadcast(context);
+    }
+
+    protected void initMusicBroadcast(Context context) {
+        if(musicBroadcastReceiver != null){
+            try {
+                context.unregisterReceiver(musicBroadcastReceiver);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        musicBroadcastReceiver = new MusicBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        String packageName = context.getPackageName();
+        filter.addAction(packageName+MusicBroadcastReceiver.ACTION_PLAY);
+        filter.addAction(packageName+MusicBroadcastReceiver.ACTION_PAUSE);
+        filter.addAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_NEXT);
+        filter.addAction(packageName+MusicBroadcastReceiver.ACTION_PLAY_PRE);
+        filter.addAction(packageName+MusicBroadcastReceiver.ACTION_OTHERS);
+        context.registerReceiver(musicBroadcastReceiver,filter);
+    }
+
+    protected void unRegisterMusicBroadcast(Context context){
+        if(musicBroadcastReceiver != null){
+            context.unregisterReceiver(musicBroadcastReceiver);
+            musicBroadcastReceiver = null;
+        }
     }
 
     protected boolean handleOtherMessage(Message msg){
@@ -150,6 +182,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
         _musicPlayer.destroy();
         _musicPlayer = null;
         _eventsList.clear();
+        unRegisterMusicBroadcast(_mContext);
     }
 
     @Override
@@ -264,5 +297,49 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
             event.onReceiveControllerCommand( action,o);
         }
         return true;
+    }
+
+    /**
+     * 处理来自notification的消息
+     * @return 返回true表示自己处理，false 交给父类
+     * */
+    protected boolean handelMusicBroadcast(Context context, Intent intent){
+        return false;
+    }
+
+    public class MusicBroadcastReceiver extends BroadcastReceiver {
+        public static final String MUSIC_ACTION = "action";
+        public static final String ACTION_PLAY = "action_play";
+        public static final String ACTION_PAUSE = "action_pause";
+        public static final String ACTION_PLAY_NEXT = "action_play_next";
+        public static final String ACTION_PLAY_PRE = "action_play_pre";
+        public static final String ACTION_OTHERS = "action_others_command";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            action = TextUtils.isEmpty(action)?"":action.replace(context.getPackageName(),"");
+            Log.d(TAG,"MusicBroadcastReceiver  : onReceive "+action);
+            switch (action){
+                case ACTION_PLAY:
+                    play();
+                    break;
+                case ACTION_PAUSE:
+                    pause();
+                    break;
+                case ACTION_PLAY_NEXT:
+                    playNext();
+                    break;
+                case ACTION_PLAY_PRE:
+                    playPre();
+                    break;
+                case ACTION_OTHERS:
+                    handelMusicBroadcast(context,intent);
+                    break;
+                default:
+                    handelMusicBroadcast(context,intent);
+                    break;
+            }
+        }
     }
 }

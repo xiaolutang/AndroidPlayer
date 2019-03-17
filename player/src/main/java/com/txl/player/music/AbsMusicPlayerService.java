@@ -38,6 +38,12 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         if(playerControllerProxy == null){
             playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);

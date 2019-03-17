@@ -31,6 +31,8 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
         playerControllerProxy = new MusicPlayerControllerProxy(musicPlayerController);
     }
 
+
+
     protected abstract IMusicPlayerController createPlayerController();
 
     public void setShowNotification(boolean showNotification) {
@@ -53,6 +55,8 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
 
     @Override
     public void onDestroy() {
+        musicPlayerController.destroyPlayer();
+        musicPlayerController =null;
         super.onDestroy();
     }
 

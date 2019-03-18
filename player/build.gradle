@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: "guru.stefma.bintrayrelease"
 
-version="0.0.1" //版本号
+version="1.0.1" //版本号
 group = "com.txl.player" //jcenter的路径,可以随便自定义
 
 android {
@@ -45,7 +45,7 @@ androidArtifact{
 }
 
 publish {
-    repoName = 'easy-android-player'
+    repoName = 'maven'
     userOrg = 'tangxiaolu'
     artifactId = 'player'
     description = 'A android music and video player can simple to use'

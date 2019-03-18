@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: "guru.stefma.bintrayrelease"
 
-version="0.0.3" //版本号
-group = "com.txl" //jcenter的路径,可以随便自定义
+version="0.0.1" //版本号
+group = "com.txl.player" //jcenter的路径,可以随便自定义
 
 android {
     compileSdkVersion 28
@@ -48,7 +48,6 @@ publish {
     repoName = 'simple-android-player'
     userOrg = 'tangxiaolu'
     artifactId = 'player'
-    version = '0.0.2'
     description = 'A android music and video player can simple to use'
     website = "https://github.com/xiaolutang/AndroidPlayer"
     desc = 'This is used to play audio and video' //描述

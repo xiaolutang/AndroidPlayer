@@ -45,7 +45,7 @@ androidArtifact{
 }
 
 publish {
-    repoName = 'simple-android-player'
+    repoName = 'easy-android-player'
     userOrg = 'tangxiaolu'
     artifactId = 'player'
     description = 'A android music and video player can simple to use'

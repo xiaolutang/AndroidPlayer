@@ -1,5 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: "guru.stefma.bintrayrelease"
+
+version="0.0.3" //版本号
+group = "com.txl" //jcenter的路径,可以随便自定义
 
 android {
     compileSdkVersion 28
@@ -36,12 +39,17 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 
+//当前这个bintrayRelease依赖于AndroidArtifacts
+androidArtifact{
+    artifactId = "bintrayrelease"
+}
+
 publish {
     repoName = 'simple-android-player'
     userOrg = 'tangxiaolu'
-    groupId = 'com.txl.player'
-    artifactId = 'simple-android-player'
+    artifactId = 'player'
     version = '0.0.2'
     description = 'A android music and video player can simple to use'
     website = "https://github.com/xiaolutang/AndroidPlayer"
+    desc = 'This is used to play audio and video' //描述
 }

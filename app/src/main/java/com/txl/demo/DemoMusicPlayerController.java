@@ -6,12 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.txl.page.MainActivity;
 import com.txl.player.music.AbsPlayerController;
-import com.txl.player.music.MediaNotificationManager;
+import com.txl.player.music.AbsNotificationFactory;
 import com.txl.player.music.PlayerTag;
 import com.txl.player.android.player.R;
 
@@ -36,8 +35,8 @@ public class DemoMusicPlayerController extends AbsPlayerController {
     }
 
     @Override
-    public MediaNotificationManager createMediaNotificationManager(Context context) {
-        return new DemoMediaNotificationFactory(context);
+    public AbsNotificationFactory createMediaNotificationManager(Context context) {
+        return new DemoNotificationFactory(context);
     }
 
     @Override
@@ -98,8 +97,8 @@ public class DemoMusicPlayerController extends AbsPlayerController {
      * @author TXL
      * description :
      */
-    public class DemoMediaNotificationFactory extends MediaNotificationManager {
-        public DemoMediaNotificationFactory(Context context) {
+    public class DemoNotificationFactory extends AbsNotificationFactory {
+        public DemoNotificationFactory(Context context) {
             super(context);
         }
 

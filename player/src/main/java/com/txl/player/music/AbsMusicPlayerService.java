@@ -16,7 +16,7 @@ public abstract class AbsMusicPlayerService extends Service implements IMusicPla
     protected boolean showNotification = true;
     IMusicPlayerController musicPlayerController;
     MusicPlayerControllerProxy playerControllerProxy;
-    protected MediaNotificationManager notificationManager;
+    protected AbsNotificationFactory notificationManager;
 
     public AbsMusicPlayerService() {
 

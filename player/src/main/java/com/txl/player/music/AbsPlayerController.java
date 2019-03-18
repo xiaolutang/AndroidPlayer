@@ -20,7 +20,7 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
     protected final String TAG = getClass().getSimpleName();
 
     final int MESSAGE_UPDATE_TIME = 0x01;
-    private MediaNotificationManager notificationManager;
+    private AbsNotificationFactory notificationManager;
     protected Context _mContext;
     private List<IMusicPlayer.IMusicPlayerEvents> _eventsList;
 
@@ -102,10 +102,10 @@ public abstract class AbsPlayerController implements IMusicPlayerController, IMu
         return new AndroidMusicPlayer( _mContext, true, true);
     }
 
-    public abstract MediaNotificationManager createMediaNotificationManager(Context context);
+    public abstract AbsNotificationFactory createMediaNotificationManager(Context context);
 
     @Override
-    public MediaNotificationManager getNotificationManager() {
+    public AbsNotificationFactory getNotificationManager() {
         return notificationManager;
     }
 

@@ -41,7 +41,7 @@ publish {
     userOrg = 'tangxiaolu'
     groupId = 'com.txl.player'
     artifactId = 'simple-android-player'
-    version = '0.0.1'
+    version = '0.0.2'
     description = 'A android music and video player can simple to use'
     website = "https://github.com/xiaolutang/AndroidPlayer"
 }

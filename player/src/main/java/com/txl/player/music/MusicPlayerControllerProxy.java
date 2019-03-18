@@ -75,7 +75,7 @@ public class MusicPlayerControllerProxy extends Binder implements IMusicPlayerCo
     }
 
     @Override
-    public MediaNotificationManager getNotificationManager() {
+    public AbsNotificationFactory getNotificationManager() {
         return null;
     }
 

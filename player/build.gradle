@@ -40,8 +40,8 @@ dependencies {
 def siteUrl = 'https://github.com/xiaolutang/AndroidPlayer' // 项目主页。
 def gitUrl = 'https://github.com/xiaolutang/AndroidPlayer.git' // Git仓库的url。
 
-group = "com.txl.test.player"// 唯一包名,比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的com.ansen.http就是这里配置的。
-version = "1.0.1"//项目引用的版本号，比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的1.0.1就是这里配置的。
+group = "com.txl.test"// 唯一包名,比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的com.ansen.http就是这里配置的。
+version = "1.0.4"//项目引用的版本号，比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的1.0.1就是这里配置的。
 
 install {
     repositories.mavenInstaller {
@@ -50,7 +50,7 @@ install {
             project {
                 packaging 'aar'
                 // 项目描述，复制我的话，这里需要修改。
-                name 'SimpleAndroidPlayer'// 可选，项目名称。
+                name 'player'// 可选，项目名称。
                 description 'a simple player use to play audio and video'// 可选，项目描述。
                 url siteUrl // 项目主页，这里是引用上面定义好。
 
@@ -90,6 +90,13 @@ task sourcesJar(type: Jar) {
 
 // 生成jarDoc的task，不需要修改。
 task javadoc(type: Javadoc) {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        author true
+        version true
+        links "http://docs.oracle.com/javase/8/docs/api"
+    }
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     // destinationDir = file("../javadoc/")

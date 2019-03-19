@@ -55,7 +55,7 @@ public class DemoMusicPlayerController extends AbsPlayerController {
     private void prepareMusicData(){
         musicData = new ArrayList<>(  );
         //需要自己处理播放地址，这个地址仅限当天有效
-        musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://fs.w.kugou.com/201903171123/dadac9f0a31323d89246309adcecb5c5/G111/M06/1D/10/D4cBAFoL9VyASCmXADTAFw14uaI428.mp3") );
+        musicData.add( new MusicData(R.drawable.music_author_01,"生僻字","http://ts2.ijntv.cn/jnyypl/sd/live.m3u8") );
         musicData.add( new MusicData(R.drawable.music_author_02,"一曲相思","http://fs.w.kugou.com/201903171124/91a30e730f830675816c05bba1f6707a/G085/M07/0B/10/lQ0DAFujV42AK4xpACkHR2d9qTo587.mp3") );
     }
 

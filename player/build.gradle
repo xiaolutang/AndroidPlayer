@@ -30,6 +30,7 @@ android {
     }
 }
 
+def exoplayer_version = '2.9.6'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -37,6 +38,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    //使用配置文件配置版本
+    implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
 }
 
 //当前这个bintrayRelease依赖于AndroidArtifacts
